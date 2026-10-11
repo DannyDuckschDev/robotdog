@@ -2,7 +2,8 @@
 # Compiles a sketch and uploads it to the first Uno found over USB.
 # Usage: ./flash.sh                     (bench firmware)
 #        ./flash.sh tests/jaw_test      (any sketch folder)
-# Needs arduino-cli (brew install arduino-cli; arduino-cli core install arduino:avr).
+# Needs arduino-cli (brew install arduino-cli; arduino-cli core install arduino:avr;
+# arduino-cli lib install Servo).
 cd "$(dirname "$0")"
 SKETCH=${1:-firmware/bench}
 PORT=$(ls /dev/cu.usbmodem* /dev/cu.usbserial* /dev/cu.wchusbserial* 2>/dev/null | head -1)

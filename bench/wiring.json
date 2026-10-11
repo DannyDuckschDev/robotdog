@@ -1,0 +1,87 @@
+{
+  "power": {
+    "5V": {
+      "rail": "+",
+      "color": "red"
+    },
+    "GND": {
+      "rail": "-",
+      "color": "grey",
+      "unoPin": "GND (top, next to 13)"
+    }
+  },
+  "parts": [
+    {
+      "id": "jaw",
+      "name": "Mouth (jaw)",
+      "type": "servo",
+      "pin": 9,
+      "row": 1,
+      "closed": 0,
+      "open": 80,
+      "speed": 10,
+      "wires": {
+        "link": "green",
+        "signal": "yellow",
+        "power": "orange",
+        "ground": "grey"
+      }
+    },
+    {
+      "id": "yaw",
+      "name": "Yaw (neck)",
+      "type": "servo",
+      "pin": 2,
+      "planned": true
+    },
+    {
+      "id": "roll",
+      "name": "Roll (neck)",
+      "type": "servo",
+      "pin": 3,
+      "planned": true
+    },
+    {
+      "id": "pitch",
+      "name": "Pitch (neck)",
+      "type": "servo",
+      "pin": 4,
+      "planned": true
+    },
+    {
+      "id": "eye-l",
+      "name": "Left eye",
+      "type": "servo",
+      "pin": 5,
+      "planned": true
+    },
+    {
+      "id": "eye-r",
+      "name": "Right eye",
+      "type": "servo",
+      "pin": 6,
+      "planned": true
+    },
+    {
+      "id": "eyelid",
+      "name": "Eyelid",
+      "type": "servo",
+      "pin": 7,
+      "planned": true
+    },
+    {
+      "id": "ear-l",
+      "name": "Left ear",
+      "type": "servo",
+      "pin": 8,
+      "planned": true
+    },
+    {
+      "id": "ear-r",
+      "name": "Right ear",
+      "type": "servo",
+      "pin": 10,
+      "planned": true
+    }
+  ]
+}

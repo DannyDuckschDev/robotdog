@@ -20,6 +20,11 @@
     --silk: #e9f5fa;
     --pin: #1a1d24;
     --pin-off: #3a404d;
+    --bb: #f1efe9;
+    --bb-edge: #d6d2c8;
+    --bb-hole: #4a4a4a;
+    --bb-text: #6b6659;
+    --tag: #b35c00;
     --term-bg: #12151c;
     --term-text: #d6dbe5;
     --term-tx: #74c0fc;
@@ -34,6 +39,8 @@
       --line: #2a303c;
       --board: #1a5c74;
       --board-edge: #12465a;
+      --bb: #dcd8ce;
+      --tag: #ffc078;
     }
   }
   :root[data-theme="dark"] {
@@ -44,6 +51,8 @@
     --line: #2a303c;
     --board: #1a5c74;
     --board-edge: #12465a;
+    --bb: #dcd8ce;
+    --tag: #ffc078;
   }
   * { box-sizing: border-box; }
   body {
@@ -63,6 +72,7 @@
   button:disabled { opacity: .45; cursor: default; }
   button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   button.stop { background: var(--bad); border-color: var(--bad); color: #fff; font-weight: 600; }
+  button.danger { color: var(--bad); }
   .status { display: flex; align-items: center; gap: 6px; color: var(--muted); }
   .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
   .dot.ok { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
@@ -71,48 +81,71 @@
   .banner { margin: 12px 16px 0; padding: 10px 12px; border-radius: 6px; background: #fff3bf; color: #5c3c00; display: none; }
   main {
     display: grid; gap: 16px; padding: 16px;
-    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
   @media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); } }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
   .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 10px; }
+  .wide { grid-column: 1 / -1; }
   svg { width: 100%; height: auto; display: block; }
   .pin { cursor: pointer; }
   .pin rect.hole { fill: var(--pin-off); stroke: var(--pin); stroke-width: 2; }
   .pin.fixed { cursor: help; }
-  .pin.fixed rect.hole { fill: #555b66; }
-  .pin.reserved rect.hole { fill: #555b66; }
+  .pin.fixed rect.hole, .pin.reserved rect.hole { fill: #555b66; }
   .pin:hover rect.hole { stroke: #fff; }
   .pin.selected rect.hole { stroke: var(--accent); stroke-width: 3; }
   .pin text { fill: var(--silk); font: 600 11px ui-monospace, Menlo, monospace; pointer-events: none; }
-  .pin text.tag { fill: #ffd8a8; font-weight: 700; }
+  .pin text.tag { fill: var(--tag); font: 700 11px -apple-system, sans-serif; }
+  .pin text.tag.planned { opacity: .55; font-weight: 500; }
+  .wire { fill: none; stroke-width: 3.5; stroke-linecap: round; opacity: .9; }
+  .wire.casing { stroke: #0006; stroke-width: 5.5; }
+  svg.focus .wire:not(.hl) { opacity: .15; }
+  svg.focus .wire.hl { stroke-width: 5; opacity: 1; }
+  svg.focus .wire.casing.hl { stroke-width: 7; }
+  .servo-box { cursor: pointer; }
+  .servo-box rect { fill: #1c4fa0; stroke: #133a78; stroke-width: 2; }
+  .servo-box.selected rect { stroke: var(--accent); stroke-width: 3; }
+  .servo-box text { fill: #fff; font: 600 12px -apple-system, sans-serif; pointer-events: none; }
+  .servo-box text.sub { font-weight: 400; font-size: 11px; opacity: .8; }
   .legend { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin-top: 8px; }
   .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
   .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin-bottom: 12px; }
   .kv dt { color: var(--muted); }
   .kv dd { margin: 0; font-family: ui-monospace, Menlo, monospace; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
-  input[type=text] {
-    font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line);
+  .form { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 8px 0 12px; }
+  .form label { color: var(--muted); }
+  input[type=text], input[type=number], select {
+    font: inherit; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--line);
     background: var(--bg); color: var(--text); min-width: 0;
   }
+  input[type=number] { width: 80px; }
   input[type=range] { flex: 1; min-width: 120px; accent-color: var(--accent); }
   .muted { color: var(--muted); }
+  .warn-text { color: var(--warn); font-size: 13px; }
+  .colors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 10px; }
+  .colors label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--muted); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  td, th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  td, th { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); }
   th { color: var(--muted); font-weight: 500; }
-  .term-card { grid-column: 1 / -1; }
+  tr.part { cursor: pointer; }
+  tr.part:hover td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  tr.part.selected td { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+  tr.part.planned td { color: var(--muted); }
+  .pill { font-size: 11px; padding: 1px 6px; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); }
+  .pill.wired { border-color: var(--ok); color: var(--ok); }
+  #saveState { font-size: 12px; text-transform: none; letter-spacing: 0; }
   #log {
     background: var(--term-bg); color: var(--term-text); border-radius: 8px;
-    font: 12.5px/1.5 ui-monospace, Menlo, monospace; height: 240px; overflow-y: auto;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace; height: 220px; overflow-y: auto;
     padding: 8px 10px; white-space: pre-wrap; word-break: break-word;
   }
   #log .tx { color: var(--term-tx); }
   #log .err { color: var(--term-err); }
   #log .sys { color: #8d95a8; font-style: italic; }
   #log .t { color: #5c6475; }
-  .term-input { display: flex; gap: 8px; margin-top: 8px; }
-  .term-input input { flex: 1; font-family: ui-monospace, Menlo, monospace; }
+  .term-input { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .term-input input { flex: 1; font-family: ui-monospace, Menlo, monospace; min-width: 200px; }
   code { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
 </style>
 </head>
@@ -123,34 +156,41 @@
   <button id="disconnect" disabled>Disconnect</button>
   <div class="status"><span id="dot" class="dot"></span><span id="statusText">Not connected</span></div>
   <span class="spacer"></span>
-  <button id="stopAll" class="stop" disabled title="Every output pin back to LOW">STOP ALL</button>
+  <button id="stopAll" class="stop" disabled title="Every output LOW, every servo holds still">STOP ALL</button>
 </header>
-<div id="banner" class="banner">This browser has no Web Serial. Open this page in <b>Chrome</b> or <b>Edge</b>.</div>
+<div id="banner" class="banner"></div>
 
 <main>
-  <section class="card">
-    <h2>Pinout — click a pin</h2>
-    <svg id="board" viewBox="0 0 700 440" role="img" aria-label="Arduino Uno R3 pinout"></svg>
+  <section class="card wide">
+    <h2>Wiring — click a pin, a servo or a wire</h2>
+    <svg id="board" viewBox="0 -90 1190 580" role="img" aria-label="Uno, breadboard and servo wiring"></svg>
     <div class="legend">
-      <span style="--c: var(--pin-off)">usable pin</span>
-      <span style="--c: var(--accent)">output HIGH / PWM</span>
+      <span style="--c: var(--pin-off)">free pin</span>
+      <span style="--c: var(--accent)">output on</span>
       <span style="--c: #555b66">power or reserved</span>
-      <span>~ = PWM (speed control)</span>
+      <span>~ = PWM</span>
+      <span style="--c: var(--tag)">part on this pin (faded = planned)</span>
+      <span>wires use the colours from wiring.json</span>
     </div>
   </section>
 
   <section class="card">
-    <h2>Selected pin</h2>
-    <div id="pinPanel"><p class="muted">Click a pin on the board.</p></div>
-    <h2 style="margin-top:18px">Your wiring labels</h2>
-    <div id="wiring"><p class="muted">Name a pin (e.g. <code>IN1</code>, <code>ENA</code>) and it shows up here and on the board.</p></div>
+    <h2 id="detailTitle">Selected</h2>
+    <div id="detail"><p class="muted">Click a pin, a servo, or a part in the list.</p></div>
   </section>
 
-  <section class="card term-card">
+  <section class="card">
+    <h2>Parts <span id="saveState" class="muted"></span></h2>
+    <div id="parts"></div>
+    <div class="row"><button id="addPart">+ Add part</button></div>
+    <p class="muted" style="font-size:12px;margin:4px 0 0">Saved to <code>bench/wiring.json</code> in the repo. Planned parts have a pin but no wires yet.</p>
+  </section>
+
+  <section class="card wide">
     <h2>Terminal</h2>
     <div id="log"></div>
     <div class="term-input">
-      <input id="cmd" type="text" placeholder="Type a command, e.g. HIGH 7, PWM 9 128, READ 4, AREAD A0" autocomplete="off" disabled>
+      <input id="cmd" type="text" placeholder="e.g. SERVO 9 80 10, HIGH 7, READ 4, AREAD A0" autocomplete="off" disabled>
       <button id="send" disabled>Send</button>
       <button data-quick="PING" disabled>PING</button>
       <button data-quick="INFO" disabled>INFO</button>
@@ -160,8 +200,7 @@
 </main>
 
 <script>
-// ---- Pin definitions (Uno R3, top view, USB on the left) ----
-// code: the number you use in Arduino code. pwm: supports analogWrite.
+// ---------- Pin definitions (Uno R3, top view, USB on the left) ----------
 const TOP_LEFT  = ['SCL','SDA','AREF','GND','D13','D12','D11','D10','D9','D8'];
 const TOP_RIGHT = ['D7','D6','D5','D4','D3','D2','D1','D0'];
 const BOT_LEFT  = ['NC','IOREF','RESET','3V3','5V','GND','GND','VIN'];
@@ -169,11 +208,16 @@ const BOT_RIGHT = ['A0','A1','A2','A3','A4','A5'];
 const PWM = new Set([3,5,6,9,10,11]);
 const NOTES = {
   SCL: 'I2C clock (same as A5)', SDA: 'I2C data (same as A4)', AREF: 'Analog reference, leave free',
-  GND: 'Ground. Must also connect to the motor driver GND.', NC: 'Not connected',
+  GND: 'Ground. Every external power supply must share it.', NC: 'Not connected',
   IOREF: '5 V logic level reference', RESET: 'Pull LOW to reset the board',
-  '3V3': '3.3 V out, max 50 mA', '5V': '5 V out (from USB). Do NOT power motors from this.',
+  '3V3': '3.3 V out, max 50 mA', '5V': '5 V out (from USB). Fine for one or two small servos, not for motors.',
   VIN: 'Input 7–12 V when powering the Uno without USB',
   D0: 'RX — used by USB serial, reserved', D1: 'TX — used by USB serial, reserved',
+};
+const USABLE = [...Array(12)].map((_, i) => 'D' + (i + 2)).concat(['A0','A1','A2','A3','A4','A5']);
+const COLORS = {
+  red: '#e03131', orange: '#f76707', yellow: '#fab005', green: '#0ca678', blue: '#1c7ed6',
+  purple: '#ae3ec9', grey: '#8f969e', black: '#343a40', white: '#e9ecef', brown: '#8b5a2b',
 };
 
 function codeNum(name) {
@@ -182,18 +226,29 @@ function codeNum(name) {
   return null;
 }
 function usable(name) { const n = codeNum(name); return n !== null && n >= 2; }
+function pinName(n) { return n >= 14 ? 'A' + (n - 14) : 'D' + n; }
+function norm(p) {
+  if (p == null) return null;
+  p = String(p).toUpperCase();
+  if (/^A\d$/.test(p)) return p;
+  const n = +p.replace(/^D/, '');
+  return Number.isNaN(n) ? null : pinName(n);
+}
+function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
 
-// ---- State ----
-const state = {};       // name -> { mode: 'OUT'|'IN'|'PULLUP'|null, value: 0|1, pwm: null|0-255, read: null }
-let labels = {};
-try { labels = JSON.parse(localStorage.getItem('bench.labels') || '{}'); } catch {}
-let selected = null;
+// ---------- State ----------
+let wiring = { power: {}, parts: [] };
+const pins = {};          // 'D9' -> { mode, value, pwm, read, angle }
+let selection = null;     // { kind: 'pin', name } | { kind: 'part', id }
 
-function saveLabels() { try { localStorage.setItem('bench.labels', JSON.stringify(labels)); } catch {} }
+function partOnPin(name) { return wiring.parts.find(p => norm(p.pin) === name); }
+function partById(id) { return wiring.parts.find(p => p.id === id); }
+function isWired(p) { return !p.planned && Number.isInteger(p.row) && p.row > 0; }
 
-// ---- Board drawing ----
+// ---------- Drawing ----------
 const svg = document.getElementById('board');
 const NS = 'http://www.w3.org/2000/svg';
+let pinPos = {};
 function el(tag, attrs, parent) {
   const e = document.createElementNS(NS, tag);
   for (const k in attrs) e.setAttribute(k, attrs[k]);
@@ -201,36 +256,53 @@ function el(tag, attrs, parent) {
   return e;
 }
 
-function drawBoard() {
+// Breadboard geometry: rails on the left, holes a–e to the right.
+const BB = { x: 760, y: 10, w: 190, top: 40, plus: 780, minus: 802, cols: { a: 846, b: 866, c: 886, d: 906, e: 926 } };
+function bbRows() {
+  const used = wiring.parts.filter(isWired).map(p => p.row);
+  return Math.min(63, Math.max(14, ...used.map(r => r + 2)));
+}
+function rowY(r) { return BB.top + (r - 1) * Math.min(26, 380 / bbRows()); }
+
+function draw() {
+  svg.innerHTML = '';
+  pinPos = {};
+  drawUno();
+  drawBreadboard();
+  drawWires();
+  drawServos();
+  paintAll();
+  applyFocus();
+}
+
+function drawUno() {
   el('rect', { x: 40, y: 40, width: 620, height: 360, rx: 18, fill: 'var(--board)', stroke: 'var(--board-edge)', 'stroke-width': 4 });
-  // USB-B jack and barrel jack
   el('rect', { x: 18, y: 80, width: 92, height: 80, rx: 4, fill: '#b8bec8', stroke: '#868d99', 'stroke-width': 2 });
   el('text', { x: 64, y: 125, 'text-anchor': 'middle', fill: '#333', 'font-size': 13, 'font-weight': 700 }).textContent = 'USB';
   el('rect', { x: 18, y: 300, width: 80, height: 70, rx: 4, fill: '#222', stroke: '#000', 'stroke-width': 2 });
   el('text', { x: 58, y: 340, 'text-anchor': 'middle', fill: '#aaa', 'font-size': 11 }).textContent = 'DC 7–12V';
-  // ATmega328P chip
-  el('rect', { x: 330, y: 250, width: 250, height: 54, rx: 3, fill: '#1a1a1a' });
-  el('text', { x: 455, y: 282, 'text-anchor': 'middle', fill: '#999', 'font-size': 12, 'font-family': 'monospace' }).textContent = 'ATmega328P';
-  el('text', { x: 200, y: 215, fill: 'var(--silk)', 'font-size': 26, 'font-weight': 800, opacity: .9 }).textContent = 'UNO R3';
-  el('text', { x: 200, y: 238, fill: 'var(--silk)', 'font-size': 12, opacity: .7 }).textContent = 'top view · USB on the left';
-  // Built-in LED next to D13
-  el('circle', { id: 'led13', cx: 300, cy: 170, r: 6, fill: '#553' });
-  el('text', { x: 312, y: 174, fill: 'var(--silk)', 'font-size': 11 }).textContent = 'L (pin 13)';
-  el('text', { x: 430, y: 180, fill: 'var(--silk)', 'font-size': 12, opacity: .8 }).textContent = 'DIGITAL (PWM ~)';
-  el('text', { x: 440, y: 308, fill: 'var(--silk)', 'font-size': 12, opacity: .8 }).textContent = 'ANALOG IN';
-  el('text', { x: 250, y: 308, fill: 'var(--silk)', 'font-size': 12, opacity: .8 }).textContent = 'POWER';
-
-  header(TOP_LEFT, 205, 54, true);
-  header(TOP_RIGHT, 430, 54, true);
-  header(BOT_LEFT, 250, 372, false);
-  header(BOT_RIGHT, 440, 372, false);
+  el('rect', { x: 330, y: 215, width: 250, height: 50, rx: 3, fill: '#1a1a1a' });
+  el('text', { x: 455, y: 245, 'text-anchor': 'middle', fill: '#999', 'font-size': 12, 'font-family': 'monospace' }).textContent = 'ATmega328P';
+  el('text', { x: 150, y: 210, fill: 'var(--silk)', 'font-size': 26, 'font-weight': 800, opacity: .9 }).textContent = 'UNO R3';
+  el('text', { x: 150, y: 232, fill: 'var(--silk)', 'font-size': 12, opacity: .7 }).textContent = 'top view · USB on the left';
+  el('circle', { id: 'led13', cx: 300, cy: 150, r: 6, fill: '#553' });
+  el('text', { x: 312, y: 154, fill: 'var(--silk)', 'font-size': 11 }).textContent = 'L (pin 13)';
+  el('text', { x: 430, y: 150, fill: 'var(--silk)', 'font-size': 12, opacity: .8 }).textContent = 'DIGITAL (PWM ~)';
+  el('text', { x: 440, y: 305, fill: 'var(--silk)', 'font-size': 12, opacity: .8 }).textContent = 'ANALOG IN';
+  el('text', { x: 250, y: 305, fill: 'var(--silk)', 'font-size': 12, opacity: .8 }).textContent = 'POWER';
+  header(TOP_LEFT, 205, 54, true, 'top');
+  header(TOP_RIGHT, 430, 54, true, 'top');
+  header(BOT_LEFT, 250, 372, false, 'power');
+  header(BOT_RIGHT, 440, 372, false, 'analog');
 }
 
-function header(names, x0, y, top) {
+function header(names, x0, y, top, group) {
   const step = 22;
   el('rect', { x: x0 - 4, y: y - 4, width: names.length * step + 4, height: 22, fill: '#111', rx: 2 });
   names.forEach((name, i) => {
     const x = x0 + i * step;
+    const key = name === 'GND' ? 'GND-' + group : name;
+    if (!pinPos[key]) pinPos[key] = { x: x + 7, y: y + 7, top };
     const g = el('g', { class: 'pin', 'data-pin': name });
     const n = codeNum(name);
     if (!usable(name)) g.classList.add(name === 'D0' || name === 'D1' ? 'reserved' : 'fixed');
@@ -238,13 +310,13 @@ function header(names, x0, y, top) {
     const printed = (n !== null && PWM.has(n) ? '~' : '') + (name.startsWith('D') ? name.slice(1) : name);
     const tx = x + 11, ty = top ? y + 22 : y - 8;
     el('text', { x: tx, y: ty, transform: `rotate(-90 ${tx} ${ty})`, 'text-anchor': top ? 'end' : 'start' }, g).textContent = printed;
-    // wiring label on the outside of the board
     const lx = x + 11, ly = top ? y - 10 : y + 26;
-    const tag = el('text', { class: 'tag', x: lx, y: ly, transform: `rotate(-90 ${lx} ${ly})`, 'text-anchor': top ? 'start' : 'end' }, g);
-    tag.dataset.tagFor = name;
-    const title = el('title', {}, g);
-    title.textContent = pinTitle(name);
-    g.addEventListener('click', () => select(name));
+    el('text', { class: 'tag', x: lx, y: ly, transform: `rotate(-90 ${lx} ${ly})`, 'text-anchor': top ? 'start' : 'end' }, g);
+    el('title', {}, g).textContent = pinTitle(name);
+    g.addEventListener('click', () => {
+      const part = usable(name) && partOnPin(name);
+      select(part ? { kind: 'part', id: part.id } : { kind: 'pin', name });
+    });
   });
 }
 
@@ -254,98 +326,362 @@ function pinTitle(name) {
   return `${name} — ${NOTES[name] || ''}`;
 }
 
+function drawBreadboard() {
+  const rows = bbRows();
+  const bottom = rowY(rows) + 20;
+  el('rect', { x: BB.x, y: BB.y, width: BB.w, height: bottom - BB.y, rx: 6, fill: 'var(--bb)', stroke: 'var(--bb-edge)', 'stroke-width': 2 });
+  el('line', { x1: BB.plus - 9, y1: BB.top - 10, x2: BB.plus - 9, y2: bottom - 8, stroke: '#e03131', 'stroke-width': 2 });
+  el('line', { x1: BB.minus + 9, y1: BB.top - 10, x2: BB.minus + 9, y2: bottom - 8, stroke: '#1c7ed6', 'stroke-width': 2 });
+  el('text', { x: BB.plus, y: BB.top - 14, 'text-anchor': 'middle', fill: '#e03131', 'font-size': 15, 'font-weight': 700 }).textContent = '+';
+  el('text', { x: BB.minus, y: BB.top - 14, 'text-anchor': 'middle', fill: '#1c7ed6', 'font-size': 15, 'font-weight': 700 }).textContent = '−';
+  for (const [c, x] of Object.entries(BB.cols)) {
+    el('text', { x, y: BB.top - 14, 'text-anchor': 'middle', fill: 'var(--bb-text)', 'font-size': 11 }).textContent = c;
+  }
+  for (let r = 1; r <= rows; r++) {
+    const y = rowY(r);
+    el('text', { x: 830, y: y + 4, 'text-anchor': 'end', fill: 'var(--bb-text)', 'font-size': 10 }).textContent = r;
+    for (const x of [BB.plus, BB.minus, ...Object.values(BB.cols)]) {
+      el('rect', { x: x - 4, y: y - 4, width: 8, height: 8, rx: 1, fill: 'var(--bb-hole)' });
+    }
+  }
+  el('text', { x: BB.x + BB.w / 2, y: bottom + 18, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }).textContent = `breadboard, rows 1–${rows}`;
+}
+
+function wire(d, color, partId) {
+  const cls = partId ? ' p-' + partId : '';
+  el('path', { d, class: 'wire casing' + cls });
+  const p = el('path', { d, class: 'wire' + cls, stroke: COLORS[color] || color || '#888' });
+  if (partId) {
+    p.style.cursor = 'pointer';
+    p.addEventListener('click', () => select({ kind: 'part', id: partId }));
+  }
+}
+
+function drawWires() {
+  const rows = bbRows();
+  const pw = wiring.power || {};
+  // Power: Uno 5V and GND to the rails, entering at the bottom rows.
+  if (pw['5V']) {
+    const s = pinPos['5V'], hy = rowY(rows);
+    wire(`M${s.x},${s.y} C${s.x},${s.y + 95} ${BB.plus - 40},${hy + 70} ${BB.plus},${hy}`, pw['5V'].color);
+  }
+  if (pw.GND) {
+    const g = /top/i.test(pw.GND.unoPin || '') ? pinPos['GND-top'] : pinPos['GND-power'];
+    if (g.top) {
+      const hy = rowY(1);
+      wire(`M${g.x},${g.y} C${g.x},${g.y - 130} ${BB.minus},${hy - 120} ${BB.minus},${hy}`, pw.GND.color);
+    } else {
+      const hy = rowY(rows - 1);
+      wire(`M${g.x},${g.y} C${g.x},${g.y + 110} ${BB.minus - 30},${hy + 80} ${BB.minus},${hy}`, pw.GND.color);
+    }
+  }
+  // Each wired part: Uno pin -> hole b<row>.
+  for (const p of wiring.parts.filter(isWired)) {
+    const name = norm(p.pin), pos = pinPos[name];
+    if (!pos) continue;
+    const hx = BB.cols.b, hy = rowY(p.row);
+    const lift = pos.top ? -60 - (codeNum(name) % 5) * 10 : 90;
+    wire(`M${pos.x},${pos.y} C${pos.x},${pos.y + lift} ${hx},${hy + (pos.top ? -70 : 70)} ${hx},${hy}`, p.wires?.link, p.id);
+  }
+}
+
+function drawServos() {
+  const x = 1010, w = 170, h = 44;
+  for (const p of wiring.parts.filter(isWired)) {
+    const hy = rowY(p.row);
+    const by = Math.max(-40, hy - h / 2);
+    const w3 = p.wires || {};
+    // Signal from a<row>; power and ground from the rails one row further down.
+    const ry = rowY(p.row + 1);
+    wire(`M${BB.cols.a},${hy} C${BB.cols.a},${hy - 22} ${x - 70},${by + 10} ${x},${by + 10}`, w3.signal, p.id);
+    wire(`M${BB.plus},${ry} C${BB.plus},${ry + 40} ${x - 80},${by + 50} ${x},${by + 22}`, w3.power, p.id);
+    wire(`M${BB.minus},${ry} C${BB.minus},${ry + 30} ${x - 90},${by + 44} ${x},${by + 34}`, w3.ground, p.id);
+    const g = el('g', { class: 'servo-box', 'data-part': p.id });
+    el('rect', { x, y: by, width: w, height: h, rx: 6 }, g);
+    el('text', { x: x + 12, y: by + 19 }, g).textContent = p.name;
+    el('text', { class: 'sub', x: x + 12, y: by + 35 }, g).textContent = servoSub(p);
+    g.addEventListener('click', () => select({ kind: 'part', id: p.id }));
+  }
+}
+function servoSub(p) {
+  const a = pins[norm(p.pin)]?.angle;
+  return `pin ${codeNum(norm(p.pin))} · row ${p.row}${a != null ? ` · ${a}°` : ''}`;
+}
+
 function paintPin(name) {
   const g = svg.querySelector(`.pin[data-pin="${name}"]`);
   if (!g) return;
-  const s = state[name] || {};
+  const s = pins[name] || {};
   const hole = g.querySelector('rect.hole');
-  if (!usable(name)) { /* fixed colour */ }
-  else if (s.mode === 'OUT' && (s.pwm != null ? s.pwm > 0 : s.value)) {
+  const on = s.mode === 'OUT' && (s.pwm != null ? s.pwm > 0 : s.value);
+  if (usable(name) && on) {
     hole.style.fill = 'var(--accent)';
     hole.style.fillOpacity = s.pwm != null ? (0.25 + 0.75 * s.pwm / 255) : 1;
   } else { hole.style.fill = ''; hole.style.fillOpacity = ''; }
-  g.querySelectorAll('text.tag').forEach(t => t.textContent = labels[name] || '');
-  if (name === 'D13') {
-    const on = s.mode === 'OUT' && (s.pwm != null ? s.pwm > 0 : s.value);
-    document.getElementById('led13').setAttribute('fill', on ? '#ffd43b' : '#553');
-  }
+  const part = usable(name) && partOnPin(name);
+  const tag = g.querySelector('text.tag');
+  tag.textContent = part ? part.name : '';
+  tag.classList.toggle('planned', !!part && !isWired(part));
+  if (name === 'D13') document.getElementById('led13').setAttribute('fill', on ? '#ffd43b' : '#553');
 }
-function paintAll() { svg.querySelectorAll('.pin').forEach(g => paintPin(g.dataset.pin)); renderWiring(); }
+function paintAll() { svg.querySelectorAll('.pin').forEach(g => paintPin(g.dataset.pin)); }
 
-// ---- Selected pin panel ----
-function select(name) {
-  selected = name;
-  svg.querySelectorAll('.pin').forEach(g => g.classList.toggle('selected', g.dataset.pin === name));
-  renderPanel();
+function applyFocus() {
+  const id = selection?.kind === 'part' ? selection.id : null;
+  const pinSel = selection?.kind === 'pin' ? selection.name : (id ? norm(partById(id)?.pin) : null);
+  svg.classList.toggle('focus', !!id && isWired(partById(id) || {}));
+  svg.querySelectorAll('.wire').forEach(w => w.classList.toggle('hl', !!id && w.classList.contains('p-' + id)));
+  svg.querySelectorAll('.pin').forEach(g => g.classList.toggle('selected', g.dataset.pin === pinSel));
+  svg.querySelectorAll('.servo-box').forEach(g => g.classList.toggle('selected', g.dataset.part === id));
 }
 
-function renderPanel() {
-  const p = document.getElementById('pinPanel');
-  const name = selected;
-  if (!name) return;
-  const n = codeNum(name);
-  if (!usable(name)) {
-    p.innerHTML = `<dl class="kv"><dt>Pin</dt><dd>${name}</dd></dl><p>${NOTES[name] || ''}</p>`;
-    return;
-  }
-  const s = state[name] || {};
-  const pwm = PWM.has(n);
-  const isAnalog = name.startsWith('A');
+// ---------- Selection and detail panel ----------
+function select(sel) {
+  if (cycleRun) stopCycle();
+  selection = sel;
+  applyFocus();
+  renderParts();
+  renderDetail();
+}
+
+function renderDetail() {
+  const title = document.getElementById('detailTitle');
+  const box = document.getElementById('detail');
+  if (!selection) { title.textContent = 'Selected'; box.innerHTML = '<p class="muted">Click a pin, a servo, or a part in the list.</p>'; return; }
+  if (selection.kind === 'pin') return renderPinDetail(box, title, selection.name);
+  const p = partById(selection.id);
+  if (!p) { selection = null; return renderDetail(); }
+  renderPartDetail(box, title, p);
+}
+
+function renderPinDetail(box, title, name) {
+  title.textContent = 'Pin ' + name;
+  if (!usable(name)) { box.innerHTML = `<p>${esc(NOTES[name] || '')}</p>`; return; }
+  const n = codeNum(name), s = pins[name] || {}, live = connected(), pwm = PWM.has(n);
   const printed = (pwm ? '~' : '') + (name.startsWith('D') ? name.slice(1) : name);
-  const live = connected();
-  p.innerHTML = `
+  box.innerHTML = `
     <dl class="kv">
       <dt>Printed on board</dt><dd>${printed}</dd>
-      <dt>Number in code</dt><dd>${n}${isAnalog ? ` (or ${name})` : ''}</dd>
-      <dt>PWM speed control</dt><dd>${pwm ? 'yes (0–255)' : 'no — on/off only'}</dd>
+      <dt>Number in code</dt><dd>${n}${name.startsWith('A') ? ` (or ${name})` : ''}</dd>
+      <dt>PWM</dt><dd>${pwm ? 'yes (0–255)' : 'no — on/off only'}</dd>
       <dt>State</dt><dd id="pinState">${describe(s)}</dd>
     </dl>
     <div class="row">
       <button data-act="HIGH" ${live ? '' : 'disabled'}>HIGH (5 V)</button>
       <button data-act="LOW" ${live ? '' : 'disabled'}>LOW (0 V)</button>
       <button data-act="READ" ${live ? '' : 'disabled'}>Read</button>
-      ${isAnalog ? `<button data-act="AREAD" ${live ? '' : 'disabled'}>Read analog</button>` : ''}
+      ${name.startsWith('A') ? `<button data-act="AREAD" ${live ? '' : 'disabled'}>Read analog</button>` : ''}
     </div>
     ${pwm ? `<div class="row"><span class="muted">PWM</span>
       <input id="pwm" type="range" min="0" max="255" value="${s.pwm ?? 0}" ${live ? '' : 'disabled'}>
-      <code id="pwmVal" style="width:3ch">${s.pwm ?? 0}</code></div>` : ''}
+      <code id="pwmVal" style="width:3ch">${s.pwm ?? 0}</code></div>
+      <p class="muted" style="font-size:12px;margin:0">PWM is for motor drivers and LEDs. Servos need the servo controls instead.</p>` : ''}
+    <div class="row"><button id="addHere">+ Add a part on this pin</button></div>`;
+  box.querySelectorAll('[data-act]').forEach(b => b.onclick = () => send(`${b.dataset.act} ${name}`));
+  const range = box.querySelector('#pwm');
+  if (range) range.oninput = () => { box.querySelector('#pwmVal').textContent = range.value; throttled('pwm' + name, () => send(`PWM ${name} ${range.value}`)); };
+  box.querySelector('#addHere').onclick = () => addPart(n);
+}
+
+function renderPartDetail(box, title, p) {
+  title.textContent = p.name;
+  const name = norm(p.pin), live = connected(), servo = p.type === 'servo';
+  const wired = isWired(p);
+  const s = pins[name] || {};
+  const clash = wiring.parts.filter(o => o !== p && norm(o.pin) === name);
+  const rowClash = wired ? wiring.parts.filter(o => o !== p && isWired(o) && Math.abs(o.row - p.row) < 2) : [];
+  const pinOpts = USABLE.map(u => {
+    const other = partOnPin(u);
+    return `<option value="${codeNum(u)}" ${u === name ? 'selected' : ''}>${u.startsWith('D') ? u.slice(1) : u}${PWM.has(codeNum(u)) ? ' ~' : ''}${other && other !== p ? ' — ' + esc(other.name) : ''}</option>`;
+  }).join('');
+  const colorSel = (key, label) => `<label>${label}<select data-wire="${key}">${
+    ['', ...Object.keys(COLORS)].map(c => `<option ${(p.wires?.[key] || '') === c ? 'selected' : ''} value="${c}">${c || '—'}</option>`).join('')}</select></label>`;
+  const start = s.angle ?? p.closed ?? 90;
+
+  box.innerHTML = `
+    ${servo && wired ? `
+    <div class="row"><b>Test</b> <span class="muted" id="angleNow">${s.angle != null ? `now at ${s.angle}°` : 'position unknown'}</span></div>
     <div class="row">
-      <span class="muted">Label</span>
-      <input id="label" type="text" placeholder="e.g. IN1, ENA" value="${labels[name] || ''}" style="flex:1">
-    </div>`;
-  p.querySelectorAll('[data-act]').forEach(b => b.onclick = () => send(`${b.dataset.act} ${name}`));
-  const range = p.querySelector('#pwm');
-  if (range) range.oninput = () => { p.querySelector('#pwmVal').textContent = range.value; queuePwm(name, +range.value); };
-  p.querySelector('#label').oninput = e => {
-    const v = e.target.value.trim();
-    if (v) labels[name] = v; else delete labels[name];
-    saveLabels(); paintPin(name); renderWiring();
+      <input id="angle" type="range" min="0" max="180" value="${start}" ${live ? '' : 'disabled'}>
+      <code id="angleVal" style="width:4ch">${start}°</code>
+    </div>
+    <div class="row">
+      <button data-go="closed" ${live ? '' : 'disabled'}>Closed (${p.closed ?? '?'}°)</button>
+      <button data-go="open" ${live ? '' : 'disabled'}>Open (${p.open ?? '?'}°)</button>
+      <button id="cycle" ${live ? '' : 'disabled'}>${cycleRun ? 'Stop cycling' : 'Cycle ×5'}</button>
+      <button id="detach" ${live ? '' : 'disabled'} title="Switch the signal off; the servo goes limp">Release</button>
+    </div>
+    <div class="row">
+      <button id="setClosed" ${live ? '' : 'disabled'}>Save slider as closed</button>
+      <button id="setOpen" ${live ? '' : 'disabled'}>Save slider as open</button>
+    </div>
+    <p class="muted" style="font-size:12px;margin:0 0 10px">${live ? 'The first move jumps straight to the angle; after that it moves at the set speed. If the servo buzzes at an end, back off a few degrees.' : 'Connect the board to test.'}</p>
+    ` : servo ? `<p class="muted">Give it a breadboard row and untick “planned” to draw its wires and test it here.</p>` : ''}
+
+    <div class="form">
+      <label>Name</label><input id="f-name" type="text" value="${esc(p.name)}">
+      <label>Uno pin</label><select id="f-pin">${pinOpts}</select>
+      <label>Breadboard row</label><span><input id="f-row" type="number" min="1" max="63" value="${p.row ?? ''}" placeholder="—"> <span class="muted">servo signal in a, Uno wire in b</span></span>
+      <label>Planned</label><label style="color:var(--text)"><input id="f-planned" type="checkbox" ${p.planned ? 'checked' : ''}> not wired yet</label>
+      ${servo ? `
+      <label>Closed angle</label><input id="f-closed" type="number" min="0" max="180" value="${p.closed ?? ''}">
+      <label>Open angle</label><input id="f-open" type="number" min="0" max="180" value="${p.open ?? ''}">
+      <label>Speed</label><span><input id="f-speed" type="number" min="0" max="200" value="${p.speed ?? 10}"> <span class="muted">ms per degree, 0 = jump</span></span>` : ''}
+    </div>
+    ${clash.length ? `<p class="warn-text">Pin ${codeNum(name)} is also used by ${clash.map(c => esc(c.name)).join(', ')}.</p>` : ''}
+    ${rowClash.length ? `<p class="warn-text">Row ${p.row} is next to ${rowClash.map(c => esc(c.name)).join(', ')}. Leave a free row between parts, and never share a row: their signals would be connected.</p>` : ''}
+    ${wired ? `<div class="colors">
+      ${colorSel('link', `Uno pin ${codeNum(name)} → b${p.row}`)}
+      ${colorSel('signal', `a${p.row} → servo signal (orange)`)}
+      ${colorSel('power', '+ strip → servo red')}
+      ${colorSel('ground', '− strip → servo brown')}
+    </div>` : ''}
+    <div class="row" style="margin-top:12px"><button id="delete" class="danger">Delete part</button></div>`;
+
+  const upd = fn => { fn(); changed(); };
+  box.querySelector('#f-name').onchange = e => upd(() => p.name = e.target.value.trim() || 'Unnamed');
+  box.querySelector('#f-pin').onchange = e => upd(() => p.pin = +e.target.value);
+  box.querySelector('#f-row').onchange = e => upd(() => { const v = parseInt(e.target.value, 10); if (v > 0) p.row = Math.min(63, v); else delete p.row; });
+  box.querySelector('#f-planned').onchange = e => upd(() => { if (e.target.checked) p.planned = true; else delete p.planned; });
+  for (const k of ['closed', 'open', 'speed']) {
+    const i = box.querySelector('#f-' + k);
+    if (i) i.onchange = () => upd(() => { const v = parseInt(i.value, 10); if (Number.isFinite(v)) p[k] = Math.max(0, Math.min(k === 'speed' ? 200 : 180, v)); else delete p[k]; });
+  }
+  box.querySelectorAll('[data-wire]').forEach(sel => sel.onchange = () => upd(() => {
+    p.wires = p.wires || {};
+    if (sel.value) p.wires[sel.dataset.wire] = sel.value; else delete p.wires[sel.dataset.wire];
+  }));
+  box.querySelector('#delete').onclick = () => {
+    if (!confirm(`Delete "${p.name}" from wiring.json?`)) return;
+    wiring.parts = wiring.parts.filter(o => o !== p);
+    selection = null; changed();
   };
+
+  if (!(servo && wired)) return;
+  const range = box.querySelector('#angle');
+  range.oninput = () => {
+    box.querySelector('#angleVal').textContent = range.value + '°';
+    throttled('servo' + name, () => send(`SERVO ${name} ${range.value}`));
+  };
+  box.querySelectorAll('[data-go]').forEach(b => b.onclick = () => {
+    const a = p[b.dataset.go];
+    if (a == null) return log(`Set the ${b.dataset.go} angle first.`, 'err');
+    send(`SERVO ${name} ${a} ${p.speed ?? 10}`);
+  });
+  box.querySelector('#cycle').onclick = () => cycleRun ? stopCycle() : runCycle(p, 5);
+  box.querySelector('#detach').onclick = () => send(`DETACH ${name}`);
+  box.querySelector('#setClosed').onclick = () => { p.closed = +range.value; changed(); };
+  box.querySelector('#setOpen').onclick = () => { p.open = +range.value; changed(); };
 }
 
 function describe(s) {
+  if (s.angle != null) return `servo at ${s.angle}°`;
   if (!s.mode) return 'untouched';
   if (s.mode === 'OUT') return s.pwm != null ? `output, PWM ${s.pwm}/255 (${Math.round(s.pwm / 2.55)}%)` : `output ${s.value ? 'HIGH' : 'LOW'}`;
   return `input${s.mode === 'PULLUP' ? ' (pull-up)' : ''}${s.read != null ? `, reads ${s.read}` : ''}`;
 }
 
-function renderWiring() {
-  const w = document.getElementById('wiring');
-  const names = Object.keys(labels).sort((a, b) => codeNum(a) - codeNum(b));
-  if (!names.length) {
-    w.innerHTML = '<p class="muted">Name a pin (e.g. <code>IN1</code>, <code>ENA</code>) and it shows up here and on the board.</p>';
-    return;
-  }
-  w.innerHTML = `<table><tr><th>Label</th><th>Board pin</th><th>In code</th><th>State</th></tr>${
-    names.map(n => `<tr><td><b>${esc(labels[n])}</b></td><td>${n}</td><td>${codeNum(n)}</td><td>${describe(state[n] || {})}</td></tr>`).join('')
+// ---------- Parts list ----------
+function renderParts() {
+  const box = document.getElementById('parts');
+  const list = [...wiring.parts].sort((a, b) => (isWired(b) - isWired(a)) || (codeNum(norm(a.pin)) - codeNum(norm(b.pin))));
+  if (!list.length) { box.innerHTML = '<p class="muted">No parts yet.</p>'; return; }
+  box.innerHTML = `<table><tr><th>Part</th><th>Pin</th><th>Row</th><th>Closed / open</th><th></th></tr>${
+    list.map(p => `<tr class="part ${isWired(p) ? '' : 'planned'} ${selection?.id === p.id ? 'selected' : ''}" data-id="${esc(p.id)}">
+      <td><b>${esc(p.name)}</b></td><td>${codeNum(norm(p.pin))}</td><td>${p.row ?? '—'}</td>
+      <td>${p.closed ?? '–'}° / ${p.open ?? '–'}°</td>
+      <td><span class="pill ${isWired(p) ? 'wired' : ''}">${isWired(p) ? 'wired' : 'planned'}</span></td></tr>`).join('')
   }</table>`;
+  box.querySelectorAll('tr.part').forEach(tr => tr.onclick = () => select({ kind: 'part', id: tr.dataset.id }));
 }
-function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
 
-// ---- Serial ----
+function addPart(pin) {
+  const free = USABLE.find(u => !partOnPin(u));
+  const usedRows = wiring.parts.filter(isWired).map(p => p.row);
+  const p = {
+    id: 'part-' + Date.now().toString(36),
+    name: 'New servo', type: 'servo',
+    pin: pin ?? codeNum(free || 'D2'),
+    row: Math.max(0, ...usedRows) + 3,
+    closed: 0, open: 90, speed: 10, planned: true,
+    wires: {},
+  };
+  wiring.parts.push(p);
+  selection = { kind: 'part', id: p.id };
+  changed();
+}
+
+// ---------- Loading and saving wiring.json ----------
+let saveTimer = null;
+function changed() {
+  draw(); renderParts(); renderDetail();
+  setSave('· saving…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(save, 400);
+}
+async function save() {
+  try {
+    const r = await fetch('wiring.json', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(wiring) });
+    if (!r.ok) throw new Error(r.status);
+    setSave('· saved');
+  } catch {
+    setSave('· not saved — start the page with ./bench.sh');
+  }
+}
+function setSave(t) { document.getElementById('saveState').textContent = t; }
+
+async function loadWiring() {
+  try {
+    const r = await fetch('wiring.json', { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    wiring = await r.json();
+    wiring.parts = wiring.parts || [];
+  } catch {
+    showBanner('Could not load <code>wiring.json</code>. Start the page with <code>./bench.sh</code> instead of opening the file directly.');
+  }
+  draw(); renderParts(); renderDetail();
+}
+
+// ---------- Servo cycle ----------
+let cycleRun = null;
+const waiters = [];
+function waitForAt(name, angle, ms) {
+  return new Promise((resolve, reject) => {
+    const w = { name, angle, resolve };
+    waiters.push(w);
+    setTimeout(() => { const i = waiters.indexOf(w); if (i >= 0) { waiters.splice(i, 1); reject(new Error('timeout')); } }, ms);
+  });
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function runCycle(p, times) {
+  const name = norm(p.pin), speed = p.speed ?? 10;
+  if (p.closed == null || p.open == null) return log('Set closed and open angles first.', 'err');
+  const run = cycleRun = { stop: false };
+  renderDetail();
+  const go = async a => {
+    const from = pins[name]?.angle ?? a;
+    const done = waitForAt(name, a, Math.abs(a - from) * speed + 3000);
+    send(`SERVO ${name} ${a} ${speed}`);
+    await done;
+  };
+  try {
+    log(`Cycling ${p.name} ${times}× between ${p.closed}° and ${p.open}°`, 'sys');
+    await go(p.closed);
+    for (let i = 1; i <= times && !run.stop; i++) {
+      await go(p.open); await sleep(400);
+      if (run.stop) break;
+      await go(p.closed); await sleep(400);
+      log(`  cycle ${i} of ${times} done`, 'sys');
+    }
+  } catch { if (!run.stop) log('Servo did not report back in time, cycle stopped.', 'err'); }
+  if (cycleRun === run) { cycleRun = null; renderDetail(); }
+}
+function stopCycle() { if (cycleRun) { cycleRun.stop = true; cycleRun = null; renderDetail(); } }
+
+// ---------- Serial ----------
 let port = null, writer = null, reader = null, lastRx = 0, hbTimer = null, buf = '';
 const FILTERS = [{ usbVendorId: 0x2341 }, { usbVendorId: 0x2a03 }, { usbVendorId: 0x1a86 }, { usbVendorId: 0x0403 }, { usbVendorId: 0x10c4 }];
-
 function connected() { return !!writer; }
 
 async function connect(p) {
@@ -353,7 +689,7 @@ async function connect(p) {
     port = p || await navigator.serial.requestPort({ filters: FILTERS });
     await port.open({ baudRate: 115200 });
   } catch (e) {
-    if (e.name !== 'NotFoundError') log(`Could not open port: ${e.message}`, 'err');
+    if (e.name !== 'NotFoundError') log(`Could not open port: ${e.message}. Is the Arduino IDE Serial Monitor open?`, 'err');
     port = null; return;
   }
   writer = port.writable.getWriter();
@@ -381,7 +717,7 @@ async function readLoop() {
         if (line) onLine(line);
       }
     }
-  } catch (e) { /* port lost */ }
+  } catch { /* port lost */ }
   await closed;
   if (port) cleanup('Board disconnected.');
 }
@@ -390,7 +726,18 @@ function onLine(line) {
   lastRx = Date.now();
   const clean = line.replace(/^[^\x20-\x7e]+/, '');
   if (clean === 'PONG') { setStatus('ok', 'Connected · board responding'); if (!showHb.checked) return; }
-  else if (clean.startsWith('READY')) { setStatus('ok', `Connected · ${clean.slice(6)}`); resetState(); send('INFO'); }
+  else if (clean.startsWith('READY')) {
+    setStatus('ok', `Connected · ${clean.slice(6)}`);
+    resetPins();
+    if (!/bench 1\.[1-9]/.test(clean)) log('This firmware has no servo commands yet. Run ./flash.sh to update it.', 'err');
+  }
+  const at = clean.match(/^AT (\d+) (\d+)$/);
+  if (at) {
+    const name = pinName(+at[1]), angle = +at[2];
+    setPin(name, { angle, mode: null, pwm: null });
+    for (const w of [...waiters]) if (w.name === name && w.angle === angle) { waiters.splice(waiters.indexOf(w), 1); w.resolve(); }
+  }
+  if (cycleRun && /^(AT|OK SERVO)/.test(clean)) return;
   log(clean, clean.startsWith('ERR') ? 'err' : '');
   const m = clean.match(/^VAL (\S+) ([01])$/);
   if (m) setPin(norm(m[1]), { read: +m[2] });
@@ -405,7 +752,7 @@ function heartbeat() {
 
 async function write(text, quiet) {
   if (!writer) return;
-  if (!quiet || showHb.checked) log(text, 'tx');
+  if ((!quiet || showHb.checked) && !(cycleRun && /^SERVO/.test(text))) log(text, 'tx');
   try { await writer.write(new TextEncoder().encode(text + '\n')); }
   catch (e) { log(`Write failed: ${e.message}`, 'err'); }
 }
@@ -414,37 +761,44 @@ async function write(text, quiet) {
 function send(text) {
   const [cmd, rawPin, val] = text.trim().toUpperCase().split(/\s+/);
   const name = rawPin ? norm(rawPin) : null;
-  if (cmd === 'HIGH' || cmd === 'LOW') setPin(name, { mode: 'OUT', value: cmd === 'HIGH' ? 1 : 0, pwm: null });
-  else if (cmd === 'PWM' && PWM.has(codeNum(name))) setPin(name, { mode: 'OUT', pwm: Math.max(0, Math.min(255, +val || 0)) });
-  else if (cmd === 'IN' || cmd === 'PULLUP') setPin(name, { mode: cmd, pwm: null });
-  else if (cmd === 'STOP') for (const n in state) if (state[n].mode === 'OUT') setPin(n, { value: 0, pwm: state[n].pwm != null ? 0 : null });
+  if (cmd === 'HIGH' || cmd === 'LOW') setPin(name, { mode: 'OUT', value: cmd === 'HIGH' ? 1 : 0, pwm: null, angle: null });
+  else if (cmd === 'PWM' && PWM.has(codeNum(name))) setPin(name, { mode: 'OUT', pwm: Math.max(0, Math.min(255, +val || 0)), angle: null });
+  else if (cmd === 'IN' || cmd === 'PULLUP') setPin(name, { mode: cmd, pwm: null, angle: null });
+  else if (cmd === 'DETACH') setPin(name, { angle: null });
+  else if (cmd === 'STOP') {
+    stopCycle();
+    for (const n in pins) if (pins[n].mode === 'OUT') setPin(n, { value: 0, pwm: pins[n].pwm != null ? 0 : null });
+  }
   write(text.trim());
 }
 
-let pwmPending = null, pwmTimer = null;
-function queuePwm(name, v) {
-  pwmPending = [name, v];
-  if (pwmTimer) return;
-  pwmTimer = setTimeout(() => { pwmTimer = null; const [n, val] = pwmPending; send(`PWM ${n} ${val}`); }, 40);
-}
-
-function norm(p) {
-  if (!p) return null;
-  if (/^A\d$/.test(p)) return p;
-  const n = +p.replace(/^D/, '');
-  if (Number.isNaN(n)) return null;
-  return n >= 14 && n <= 19 ? 'A' + (n - 14) : 'D' + n;
+const throttles = {};
+function throttled(key, fn) {
+  throttles[key] = fn;
+  if (throttles[key + ':t']) return;
+  throttles[key + ':t'] = setTimeout(() => { throttles[key + ':t'] = null; throttles[key](); }, 40);
 }
 
 function setPin(name, patch) {
   if (!name || !usable(name)) return;
-  state[name] = Object.assign(state[name] || {}, patch);
-  paintPin(name); renderWiring();
-  if (name === selected) { const s = document.getElementById('pinState'); if (s) s.textContent = describe(state[name]); }
+  pins[name] = Object.assign(pins[name] || {}, patch);
+  paintPin(name);
+  const part = partOnPin(name);
+  if (patch.angle !== undefined && part) {
+    const sub = svg.querySelector(`.servo-box[data-part="${part.id}"] text.sub`);
+    if (sub) sub.textContent = servoSub(part);
+  }
+  const ps = document.getElementById('pinState');
+  if (ps && selection?.name === name) ps.textContent = describe(pins[name]);
+  const an = document.getElementById('angleNow');
+  if (an && part && selection?.id === part.id) {
+    an.textContent = pins[name].angle != null ? `now at ${pins[name].angle}°` : 'released (limp)';
+  }
 }
-function resetState() { for (const k in state) delete state[k]; paintAll(); renderPanel(); }
+function resetPins() { for (const k in pins) delete pins[k]; draw(); renderDetail(); }
 
 async function disconnect() {
+  stopCycle();
   if (writer) await write('STOP');
   const p = port;
   port = null;
@@ -455,15 +809,16 @@ async function disconnect() {
 }
 
 function cleanup(msg) {
+  cycleRun = null;
   clearInterval(hbTimer); hbTimer = null;
   writer = null; reader = null; port = null; buf = '';
   setLive(false);
   setStatus('', 'Not connected');
   log(msg, 'sys');
-  resetState();
+  resetPins();
 }
 
-// ---- UI wiring ----
+// ---------- UI wiring ----------
 const logEl = document.getElementById('log');
 const showHb = document.getElementById('showHb');
 const cmdEl = document.getElementById('cmd');
@@ -487,6 +842,7 @@ function setStatus(kind, text) {
   document.getElementById('dot').className = 'dot ' + kind;
   document.getElementById('statusText').textContent = text;
 }
+function showBanner(html) { const b = document.getElementById('banner'); b.innerHTML = html; b.style.display = 'block'; }
 
 function setLive(on) {
   document.getElementById('connect').disabled = on;
@@ -495,7 +851,7 @@ function setLive(on) {
   document.getElementById('send').disabled = !on;
   cmdEl.disabled = !on;
   document.querySelectorAll('[data-quick]').forEach(b => b.disabled = !on);
-  renderPanel();
+  renderDetail();
 }
 
 function submit() {
@@ -509,6 +865,7 @@ document.getElementById('connect').onclick = () => connect();
 document.getElementById('disconnect').onclick = disconnect;
 document.getElementById('stopAll').onclick = () => send('STOP');
 document.getElementById('send').onclick = submit;
+document.getElementById('addPart').onclick = () => addPart();
 document.querySelectorAll('[data-quick]').forEach(b => b.onclick = () => send(b.dataset.quick));
 cmdEl.addEventListener('keydown', e => {
   if (e.key === 'Enter') submit();
@@ -516,16 +873,14 @@ cmdEl.addEventListener('keydown', e => {
   else if (e.key === 'ArrowDown') { histIdx = Math.min(history.length, histIdx + 1); cmdEl.value = history[histIdx] || ''; }
 });
 
-drawBoard();
-paintAll();
+loadWiring();
 log('Plug in the Uno, then click "Connect board". Commands you can type once connected:', 'sys');
-log('  HIGH 7 · LOW 7 · PWM 9 128 · IN 4 · PULLUP 4 · READ 4 · AREAD A0 · STOP · PING · INFO', 'sys');
+log('  SERVO 9 80 · SERVO 9 80 10 · DETACH 9 · HIGH 7 · LOW 7 · PWM 3 128 · READ 4 · AREAD A0 · STOP · PING · INFO', 'sys');
 
 if (!('serial' in navigator)) {
-  document.getElementById('banner').style.display = 'block';
+  showBanner('This browser has no Web Serial. Open this page in <b>Chrome</b> or <b>Edge</b>.');
   document.getElementById('connect').disabled = true;
 } else {
-  // Reconnect automatically to a board this page was allowed to use before.
   navigator.serial.getPorts().then(ports => { if (ports[0] && !port) connect(ports[0]); });
   navigator.serial.addEventListener('connect', e => { if (!port) { log('Board plugged in.', 'sys'); connect(e.target); } });
   navigator.serial.addEventListener('disconnect', e => { if (e.target === port) cleanup('Board unplugged.'); });

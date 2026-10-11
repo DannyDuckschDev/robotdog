@@ -52,6 +52,8 @@ The Uno cannot run the Coglet or Sesame firmware as is, so every sketch in this 
 
 ### Wiring one servo
 
+The step-by-step version with photos, including the breadboard, is [`docs/setup-guide.md`](docs/setup-guide.md).
+
 | Servo wire | Uno pin |
 |---|---|
 | Brown or black (ground) | `GND` |
@@ -68,7 +70,7 @@ More than two or three servos need a separate 5 V supply. Connect its ground to 
 
 ### Pin map
 
-Coglet's nine head servos, with the Uno pin each one gets. Pins 0 and 1 stay free because the USB serial connection uses them.
+Coglet's nine head servos, with the Uno pin each one gets. The live version, with breadboard rows and angles, is [`bench/wiring.json`](bench/wiring.json). Pins 0 and 1 stay free because the USB serial connection uses them.
 
 | Servo | Uno pin | Status |
 |---|---|---|
@@ -92,13 +94,16 @@ robotdog/
 ├── bench.sh                  start the browser bench
 ├── flash.sh                  upload the bench firmware to the Uno
 ├── bench/
-│   └── index.html            browser bench: pinout, pin controls, terminal
+│   ├── index.html            browser bench: wiring drawing, servo and pin controls, terminal
+│   ├── server.py             serves the bench and saves wiring.json
+│   └── wiring.json           which part is on which pin, row and wire colour
 ├── firmware/
 │   └── bench/
 │       └── bench.ino         text-command firmware the bench talks to
 ├── docs/
 │   ├── calibration.md        closed / open / neutral angle per servo
-│   └── images/               screenshots
+│   ├── setup-guide.md        how the jaw was wired, with photos, and how to add the next servo
+│   └── images/               screenshots and setup photos
 └── tests/
     ├── jaw_test/
     │   └── jaw_test.ino      move the jaw servo to a typed angle
@@ -134,15 +139,21 @@ If the compiler reports that `Servo.h` is missing, install the "Servo" library v
 
 A page for driving the Uno's pins live from Chrome, with a clickable pinout and a serial terminal. Meant for testing the motor driver wiring before writing a real sketch.
 
-1. Flash the bench firmware once: `./flash.sh` (needs `arduino-cli`; `brew install arduino-cli`, then `arduino-cli core install arduino:avr`).
+1. Flash the bench firmware once: `./flash.sh` (needs `arduino-cli`; `brew install arduino-cli`, then `arduino-cli core install arduino:avr` and `arduino-cli lib install Servo`).
 2. Start the page: `./bench.sh`. It opens http://localhost:8765 in Chrome. Web Serial only works in Chrome or Edge.
 3. Click **Connect board** and pick the Uno. After the first time, the page reconnects by itself when the board is plugged in.
 
 ![Browser bench connected to the Uno, pin 9 labelled as the jaw servo](docs/images/bench-connected.webp)
 
-Click a pin to switch it HIGH/LOW, set PWM, read it, or give it a label like `IN1`. Labels show on the board drawing and in a wiring table, and are remembered in that browser. **STOP ALL** sets every output back to LOW.
+The page draws the Uno, the breadboard and every servo from [`bench/wiring.json`](bench/wiring.json), with each wire in the colour you actually used. Click a servo, a wire or a pin to highlight what belongs together.
 
-The firmware also works from the Arduino Serial Monitor at 115200 baud: `HIGH 7`, `LOW 7`, `PWM 9 128`, `IN 4`, `PULLUP 4`, `READ 4`, `AREAD A0`, `STOP`, `PING`, `INFO`. Pins 0 and 1 are refused because USB serial uses them. Only pins 3, 5, 6, 9, 10 and 11 do PWM, which matters for motor speed (the driver's `ENA`/`ENB`).
+- **Parts list**: add a part, set its Uno pin and breadboard row, and tick "planned" until it is wired. Every change is saved straight to `bench/wiring.json`, so commit that file like any other.
+- **Servo test**: an angle slider, buttons for the closed and open angle, and "Cycle ×5". "Save slider as closed/open" writes the angle you found into `wiring.json`.
+- **Plain pins**: HIGH/LOW, PWM and read, for the motor driver later. **STOP ALL** sets outputs LOW and makes servos hold still.
+
+Breadboard convention: a servo's signal goes in hole `a` of its row and the wire from the Uno in hole `b` of the same row. Leave a free row between parts. Red and brown go into the `+` and `−` strips, which the Uno's 5V and GND feed.
+
+The firmware also works from the Arduino Serial Monitor at 115200 baud: `SERVO 9 80` (jump), `SERVO 9 80 10` (1° every 10 ms), `DETACH 9`, `HIGH 7`, `LOW 7`, `PWM 3 128`, `IN 4`, `PULLUP 4`, `READ 4`, `AREAD A0`, `STOP`, `PING`, `INFO`. Pins 0 and 1 are refused because USB serial uses them. Only pins 3, 5, 6, 9, 10 and 11 do PWM, and 9 and 10 lose PWM while any servo is attached.
 
 ## Fabrication
 
