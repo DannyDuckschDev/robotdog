@@ -97,10 +97,13 @@ robotdog/
 │   └── bench/
 │       └── bench.ino         text-command firmware the bench talks to
 ├── docs/
-│   └── calibration.md        closed / open / neutral angle per servo
+│   ├── calibration.md        closed / open / neutral angle per servo
+│   └── images/               screenshots
 └── tests/
-    └── jaw_test/
-        └── jaw_test.ino      move the jaw servo to a typed angle
+    ├── jaw_test/
+    │   └── jaw_test.ino      move the jaw servo to a typed angle
+    └── jaw_cycle/
+        └── jaw_cycle.ino     open and close the jaw a few times
 ```
 
 ## Working with the sketches
@@ -125,6 +128,7 @@ If the compiler reports that `Servo.h` is missing, install the "Servo" library v
 | Sketch | What it does |
 |---|---|
 | `tests/jaw_test` | Type an angle from 0 to 180 in the Serial Monitor; the jaw servo moves there. Used to find the closed and open angles. |
+| `tests/jaw_cycle` | Opens and closes the jaw between two set angles a few times, at a set speed. Press Enter in the Serial Monitor to run it again. |
 
 ## Browser bench
 
@@ -133,6 +137,8 @@ A page for driving the Uno's pins live from Chrome, with a clickable pinout and 
 1. Flash the bench firmware once: `./flash.sh` (needs `arduino-cli`; `brew install arduino-cli`, then `arduino-cli core install arduino:avr`).
 2. Start the page: `./bench.sh`. It opens http://localhost:8765 in Chrome. Web Serial only works in Chrome or Edge.
 3. Click **Connect board** and pick the Uno. After the first time, the page reconnects by itself when the board is plugged in.
+
+![Browser bench connected to the Uno, pin 9 labelled as the jaw servo](docs/images/bench-connected.webp)
 
 Click a pin to switch it HIGH/LOW, set PWM, read it, or give it a label like `IN1`. Labels show on the board drawing and in a wiring table, and are remembered in that browser. **STOP ALL** sets every output back to LOW.
 
