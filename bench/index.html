@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uno Bench</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --text: #1d2330;
+    --muted: #6b7385;
+    --line: #dde1e8;
+    --accent: #e8590c;
+    --ok: #2b8a3e;
+    --bad: #c92a2a;
+    --warn: #e67700;
+    --board: #1f6f8b;
+    --board-edge: #17576e;
+    --silk: #e9f5fa;
+    --pin: #1a1d24;
+    --pin-off: #3a404d;
+    --term-bg: #12151c;
+    --term-text: #d6dbe5;
+    --term-tx: #74c0fc;
+    --term-err: #ff8787;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1218;
+      --panel: #171b23;
+      --text: #e4e7ee;
+      --muted: #8d95a8;
+      --line: #2a303c;
+      --board: #1a5c74;
+      --board-edge: #12465a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1218;
+    --panel: #171b23;
+    --text: #e4e7ee;
+    --muted: #8d95a8;
+    --line: #2a303c;
+    --board: #1a5c74;
+    --board-edge: #12465a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel);
+  }
+  h1 { font-size: 16px; margin: 0 8px 0 0; }
+  button {
+    font: inherit; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--text);
+  }
+  button:hover:not(:disabled) { border-color: var(--muted); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.stop { background: var(--bad); border-color: var(--bad); color: #fff; font-weight: 600; }
+  .status { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+  .dot.warn { background: var(--warn); }
+  .spacer { flex: 1; }
+  .banner { margin: 12px 16px 0; padding: 10px 12px; border-radius: 6px; background: #fff3bf; color: #5c3c00; display: none; }
+  main {
+    display: grid; gap: 16px; padding: 16px;
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  }
+  @media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 10px; }
+  svg { width: 100%; height: auto; display: block; }
+  .pin { cursor: pointer; }
+  .pin rect.hole { fill: var(--pin-off); stroke: var(--pin); stroke-width: 2; }
+  .pin.fixed { cursor: help; }
+  .pin.fixed rect.hole { fill: #555b66; }
+  .pin.reserved rect.hole { fill: #555b66; }
+  .pin:hover rect.hole { stroke: #fff; }
+  .pin.selected rect.hole { stroke: var(--accent); stroke-width: 3; }
+  .pin text { fill: var(--silk); font: 600 11px ui-monospace, Menlo, monospace; pointer-events: none; }
+  .pin text.tag { fill: #ffd8a8; font-weight: 700; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin-bottom: 12px; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; font-family: ui-monospace, Menlo, monospace; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+  input[type=text] {
+    font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); min-width: 0;
+  }
+  input[type=range] { flex: 1; min-width: 120px; accent-color: var(--accent); }
+  .muted { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td, th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; }
+  .term-card { grid-column: 1 / -1; }
+  #log {
+    background: var(--term-bg); color: var(--term-text); border-radius: 8px;
+    font: 12.5px/1.5 ui-monospace, Menlo, monospace; height: 240px; overflow-y: auto;
+    padding: 8px 10px; white-space: pre-wrap; word-break: break-word;
+  }
+  #log .tx { color: var(--term-tx); }
+  #log .err { color: var(--term-err); }
+  #log .sys { color: #8d95a8; font-style: italic; }
+  #log .t { color: #5c6475; }
+  .term-input { display: flex; gap: 8px; margin-top: 8px; }
+  .term-input input { flex: 1; font-family: ui-monospace, Menlo, monospace; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Uno Bench</h1>
+  <button id="connect" class="primary">Connect board</button>
+  <button id="disconnect" disabled>Disconnect</button>
+  <div class="status"><span id="dot" class="dot"></span><span id="statusText">Not connected</span></div>
+  <span class="spacer"></span>
+  <button id="stopAll" class="stop" disabled title="Every output pin back to LOW">STOP ALL</button>
+</header>
+<div id="banner" class="banner">This browser has no Web Serial. Open this page in <b>Chrome</b> or <b>Edge</b>.</div>
+
+<main>
+  <section class="card">
+    <h2>Pinout — click a pin</h2>
+    <svg id="board" viewBox="0 0 700 440" role="img" aria-label="Arduino Uno R3 pinout"></svg>
+    <div class="legend">
+      <span style="--c: var(--pin-off)">usable pin</span>
+      <span style="--c: var(--accent)">output HIGH / PWM</span>
+      <span style="--c: #555b66">power or reserved</span>
+      <span>~ = PWM (speed control)</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Selected pin</h2>
+    <div id="pinPanel"><p class="muted">Click a pin on the board.</p></div>
+    <h2 style="margin-top:18px">Your wiring labels</h2>
+    <div id="wiring"><p class="muted">Name a pin (e.g. <code>IN1</code>, <code>ENA</code>) and it shows up here and on the board.</p></div>
+  </section>
+
+  <section class="card term-card">
+    <h2>Terminal</h2>
+    <div id="log"></div>
+    <div class="term-input">
+      <input id="cmd" type="text" placeholder="Type a command, e.g. HIGH 7, PWM 9 128, READ 4, AREAD A0" autocomplete="off" disabled>
+      <button id="send" disabled>Send</button>
+      <button data-quick="PING" disabled>PING</button>
+      <button data-quick="INFO" disabled>INFO</button>
+      <label class="muted"><input id="showHb" type="checkbox"> heartbeat</label>
+    </div>
+  </section>
+</main>
+
+<script>
+// ---- Pin definitions (Uno R3, top view, USB on the left) ----
+// code: the number you use in Arduino code. pwm: supports analogWrite.
+const TOP_LEFT  = ['SCL','SDA','AREF','GND','D13','D12','D11','D10','D9','D8'];
+const TOP_RIGHT = ['D7','D6','D5','D4','D3','D2','D1','D0'];
+const BOT_LEFT  = ['NC','IOREF','RESET','3V3','5V','GND','GND','VIN'];
+const BOT_RIGHT = ['A0','A1','A2','A3','A4','A5'];
+const PWM = new Set([3,5,6,9,10,11]);
+const NOTES = {
+  SCL: 'I2C clock (same as A5)', SDA: 'I2C data (same as A4)', AREF: 'Analog reference, leave free',
+  GND: 'Ground. Must also connect to the motor driver GND.', NC: 'Not connected',
+  IOREF: '5 V logic level reference', RESET: 'Pull LOW to reset the board',
+  '3V3': '3.3 V out, max 50 mA', '5V': '5 V out (from USB). Do NOT power motors from this.',
+  VIN: 'Input 7–12 V when powering the Uno without USB',
+  D0: 'RX — used by USB serial, reserved', D1: 'TX — used by USB serial, reserved',
+};
+
+function codeNum(name) {
+  if (/^D\d+$/.test(name)) return +name.slice(1);
+  if (/^A\d$/.test(name)) return 14 + +name.slice(1);
+  return null;
+}
+function usable(name) { const n = codeNum(name); return n !== null && n >= 2; }
+
+// ---- State ----
+const state = {};       // name -> { mode: 'OUT'|'IN'|'PULLUP'|null, value: 0|1, pwm: null|0-255, read: null }
+let labels = {};
+try { labels = JSON.parse(localStorage.getItem('bench.labels') || '{}'); } catch {}
+let selected = null;
+
+function saveLabels() { try { localStorage.setItem('bench.labels', JSON.stringify(labels)); } catch {} }
+
+// ---- Board drawing ----
+const svg = document.getElementById('board');
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(e);
+  return e;
+}
+
+function drawBoard() {
+  el('rect', { x: 40, y: 40, width: 620, height: 360, rx: 18, fill: 'var(--board)', stroke: 'var(--board-edge)', 'stroke-width': 4 });
+  // USB-B jack and barrel jack
+  el('rect', { x: 18, y: 80, width: 92, height: 80, rx: 4, fill: '#b8bec8', stroke: '#868d99', 'stroke-width': 2 });
+  el('text', { x: 64, y: 125, 'text-anchor': 'middle', fill: '#333', 'font-size': 13, 'font-weight': 700 }).textContent = 'USB';
+  el('rect', { x: 18, y: 300, width: 80, height: 70, rx: 4, fill: '#222', stroke: '#000', 'stroke-width': 2 });
+  el('text', { x: 58, y: 340, 'text-anchor': 'middle', fill: '#aaa', 'font-size': 11 }).textContent = 'DC 7–12V';
+  // ATmega328P chip
+  el('rect', { x: 330, y: 250, width: 250, height: 54, rx: 3, fill: '#1a1a1a' });
+  el('text', { x: 455, y: 282, 'text-anchor': 'middle', fill: '#999', 'font-size': 12, 'font-family': 'monospace' }).textContent = 'ATmega328P';
+  el('text', { x: 200, y: 215, fill: 'var(--silk)', 'font-size': 26, 'font-weight': 800, opacity: .9 }).textContent = 'UNO R3';
+  el('text', { x: 200, y: 238, fill: 'var(--silk)', 'font-size': 12, opacity: .7 }).textContent = 'top view · USB on the left';
+  // Built-in LED next to D13
+  el('circle', { id: 'led13', cx: 300, cy: 170, r: 6, fill: '#553' });
+  el('text', { x: 312, y: 174, fill: 'var(--silk)', 'font-size': 11 }).textContent = 'L (pin 13)';
+  el('text', { x: 430, y: 180, fill: 'var(--silk)', 'font-size': 12, opacity: .8 }).textContent = 'DIGITAL (PWM ~)';
+  el('text', { x: 440, y: 308, fill: 'var(--silk)', 'font-size': 12, opacity: .8 }).textContent = 'ANALOG IN';
+  el('text', { x: 250, y: 308, fill: 'var(--silk)', 'font-size': 12, opacity: .8 }).textContent = 'POWER';
+
+  header(TOP_LEFT, 205, 54, true);
+  header(TOP_RIGHT, 430, 54, true);
+  header(BOT_LEFT, 250, 372, false);
+  header(BOT_RIGHT, 440, 372, false);
+}
+
+function header(names, x0, y, top) {
+  const step = 22;
+  el('rect', { x: x0 - 4, y: y - 4, width: names.length * step + 4, height: 22, fill: '#111', rx: 2 });
+  names.forEach((name, i) => {
+    const x = x0 + i * step;
+    const g = el('g', { class: 'pin', 'data-pin': name });
+    const n = codeNum(name);
+    if (!usable(name)) g.classList.add(name === 'D0' || name === 'D1' ? 'reserved' : 'fixed');
+    el('rect', { class: 'hole', x, y, width: 14, height: 14, rx: 2 }, g);
+    const printed = (n !== null && PWM.has(n) ? '~' : '') + (name.startsWith('D') ? name.slice(1) : name);
+    const tx = x + 11, ty = top ? y + 22 : y - 8;
+    el('text', { x: tx, y: ty, transform: `rotate(-90 ${tx} ${ty})`, 'text-anchor': top ? 'end' : 'start' }, g).textContent = printed;
+    // wiring label on the outside of the board
+    const lx = x + 11, ly = top ? y - 10 : y + 26;
+    const tag = el('text', { class: 'tag', x: lx, y: ly, transform: `rotate(-90 ${lx} ${ly})`, 'text-anchor': top ? 'start' : 'end' }, g);
+    tag.dataset.tagFor = name;
+    const title = el('title', {}, g);
+    title.textContent = pinTitle(name);
+    g.addEventListener('click', () => select(name));
+  });
+}
+
+function pinTitle(name) {
+  const n = codeNum(name);
+  if (usable(name)) return `${name} · in code: ${n}${PWM.has(n) ? ' · PWM' : ''}`;
+  return `${name} — ${NOTES[name] || ''}`;
+}
+
+function paintPin(name) {
+  const g = svg.querySelector(`.pin[data-pin="${name}"]`);
+  if (!g) return;
+  const s = state[name] || {};
+  const hole = g.querySelector('rect.hole');
+  if (!usable(name)) { /* fixed colour */ }
+  else if (s.mode === 'OUT' && (s.pwm != null ? s.pwm > 0 : s.value)) {
+    hole.style.fill = 'var(--accent)';
+    hole.style.fillOpacity = s.pwm != null ? (0.25 + 0.75 * s.pwm / 255) : 1;
+  } else { hole.style.fill = ''; hole.style.fillOpacity = ''; }
+  g.querySelectorAll('text.tag').forEach(t => t.textContent = labels[name] || '');
+  if (name === 'D13') {
+    const on = s.mode === 'OUT' && (s.pwm != null ? s.pwm > 0 : s.value);
+    document.getElementById('led13').setAttribute('fill', on ? '#ffd43b' : '#553');
+  }
+}
+function paintAll() { svg.querySelectorAll('.pin').forEach(g => paintPin(g.dataset.pin)); renderWiring(); }
+
+// ---- Selected pin panel ----
+function select(name) {
+  selected = name;
+  svg.querySelectorAll('.pin').forEach(g => g.classList.toggle('selected', g.dataset.pin === name));
+  renderPanel();
+}
+
+function renderPanel() {
+  const p = document.getElementById('pinPanel');
+  const name = selected;
+  if (!name) return;
+  const n = codeNum(name);
+  if (!usable(name)) {
+    p.innerHTML = `<dl class="kv"><dt>Pin</dt><dd>${name}</dd></dl><p>${NOTES[name] || ''}</p>`;
+    return;
+  }
+  const s = state[name] || {};
+  const pwm = PWM.has(n);
+  const isAnalog = name.startsWith('A');
+  const printed = (pwm ? '~' : '') + (name.startsWith('D') ? name.slice(1) : name);
+  const live = connected();
+  p.innerHTML = `
+    <dl class="kv">
+      <dt>Printed on board</dt><dd>${printed}</dd>
+      <dt>Number in code</dt><dd>${n}${isAnalog ? ` (or ${name})` : ''}</dd>
+      <dt>PWM speed control</dt><dd>${pwm ? 'yes (0–255)' : 'no — on/off only'}</dd>
+      <dt>State</dt><dd id="pinState">${describe(s)}</dd>
+    </dl>
+    <div class="row">
+      <button data-act="HIGH" ${live ? '' : 'disabled'}>HIGH (5 V)</button>
+      <button data-act="LOW" ${live ? '' : 'disabled'}>LOW (0 V)</button>
+      <button data-act="READ" ${live ? '' : 'disabled'}>Read</button>
+      ${isAnalog ? `<button data-act="AREAD" ${live ? '' : 'disabled'}>Read analog</button>` : ''}
+    </div>
+    ${pwm ? `<div class="row"><span class="muted">PWM</span>
+      <input id="pwm" type="range" min="0" max="255" value="${s.pwm ?? 0}" ${live ? '' : 'disabled'}>
+      <code id="pwmVal" style="width:3ch">${s.pwm ?? 0}</code></div>` : ''}
+    <div class="row">
+      <span class="muted">Label</span>
+      <input id="label" type="text" placeholder="e.g. IN1, ENA" value="${labels[name] || ''}" style="flex:1">
+    </div>`;
+  p.querySelectorAll('[data-act]').forEach(b => b.onclick = () => send(`${b.dataset.act} ${name}`));
+  const range = p.querySelector('#pwm');
+  if (range) range.oninput = () => { p.querySelector('#pwmVal').textContent = range.value; queuePwm(name, +range.value); };
+  p.querySelector('#label').oninput = e => {
+    const v = e.target.value.trim();
+    if (v) labels[name] = v; else delete labels[name];
+    saveLabels(); paintPin(name); renderWiring();
+  };
+}
+
+function describe(s) {
+  if (!s.mode) return 'untouched';
+  if (s.mode === 'OUT') return s.pwm != null ? `output, PWM ${s.pwm}/255 (${Math.round(s.pwm / 2.55)}%)` : `output ${s.value ? 'HIGH' : 'LOW'}`;
+  return `input${s.mode === 'PULLUP' ? ' (pull-up)' : ''}${s.read != null ? `, reads ${s.read}` : ''}`;
+}
+
+function renderWiring() {
+  const w = document.getElementById('wiring');
+  const names = Object.keys(labels).sort((a, b) => codeNum(a) - codeNum(b));
+  if (!names.length) {
+    w.innerHTML = '<p class="muted">Name a pin (e.g. <code>IN1</code>, <code>ENA</code>) and it shows up here and on the board.</p>';
+    return;
+  }
+  w.innerHTML = `<table><tr><th>Label</th><th>Board pin</th><th>In code</th><th>State</th></tr>${
+    names.map(n => `<tr><td><b>${esc(labels[n])}</b></td><td>${n}</td><td>${codeNum(n)}</td><td>${describe(state[n] || {})}</td></tr>`).join('')
+  }</table>`;
+}
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
+
+// ---- Serial ----
+let port = null, writer = null, reader = null, lastRx = 0, hbTimer = null, buf = '';
+const FILTERS = [{ usbVendorId: 0x2341 }, { usbVendorId: 0x2a03 }, { usbVendorId: 0x1a86 }, { usbVendorId: 0x0403 }, { usbVendorId: 0x10c4 }];
+
+function connected() { return !!writer; }
+
+async function connect(p) {
+  try {
+    port = p || await navigator.serial.requestPort({ filters: FILTERS });
+    await port.open({ baudRate: 115200 });
+  } catch (e) {
+    if (e.name !== 'NotFoundError') log(`Could not open port: ${e.message}`, 'err');
+    port = null; return;
+  }
+  writer = port.writable.getWriter();
+  log('Port open. The Uno restarts when a connection opens, waiting for READY…', 'sys');
+  setStatus('warn', 'Connected, waiting for board…');
+  setLive(true);
+  readLoop();
+  lastRx = Date.now();
+  hbTimer = setInterval(heartbeat, 2000);
+}
+
+async function readLoop() {
+  const decoder = new TextDecoderStream();
+  const closed = port.readable.pipeTo(decoder.writable).catch(() => {});
+  reader = decoder.readable.getReader();
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += value;
+      let i;
+      while ((i = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, i).replace(/\r$/, '');
+        buf = buf.slice(i + 1);
+        if (line) onLine(line);
+      }
+    }
+  } catch (e) { /* port lost */ }
+  await closed;
+  if (port) cleanup('Board disconnected.');
+}
+
+function onLine(line) {
+  lastRx = Date.now();
+  const clean = line.replace(/^[^\x20-\x7e]+/, '');
+  if (clean === 'PONG') { setStatus('ok', 'Connected · board responding'); if (!showHb.checked) return; }
+  else if (clean.startsWith('READY')) { setStatus('ok', `Connected · ${clean.slice(6)}`); resetState(); send('INFO'); }
+  log(clean, clean.startsWith('ERR') ? 'err' : '');
+  const m = clean.match(/^VAL (\S+) ([01])$/);
+  if (m) setPin(norm(m[1]), { read: +m[2] });
+  const a = clean.match(/^AVAL (\S+) (\d+)$/);
+  if (a) log(`  ${a[1]} ≈ ${(a[2] * 5 / 1023).toFixed(2)} V`, 'sys');
+}
+
+function heartbeat() {
+  if (Date.now() - lastRx > 5000) setStatus('warn', 'Connected · board not responding');
+  write('PING', true);
+}
+
+async function write(text, quiet) {
+  if (!writer) return;
+  if (!quiet || showHb.checked) log(text, 'tx');
+  try { await writer.write(new TextEncoder().encode(text + '\n')); }
+  catch (e) { log(`Write failed: ${e.message}`, 'err'); }
+}
+
+// Sends a command and updates the local picture of the pin.
+function send(text) {
+  const [cmd, rawPin, val] = text.trim().toUpperCase().split(/\s+/);
+  const name = rawPin ? norm(rawPin) : null;
+  if (cmd === 'HIGH' || cmd === 'LOW') setPin(name, { mode: 'OUT', value: cmd === 'HIGH' ? 1 : 0, pwm: null });
+  else if (cmd === 'PWM' && PWM.has(codeNum(name))) setPin(name, { mode: 'OUT', pwm: Math.max(0, Math.min(255, +val || 0)) });
+  else if (cmd === 'IN' || cmd === 'PULLUP') setPin(name, { mode: cmd, pwm: null });
+  else if (cmd === 'STOP') for (const n in state) if (state[n].mode === 'OUT') setPin(n, { value: 0, pwm: state[n].pwm != null ? 0 : null });
+  write(text.trim());
+}
+
+let pwmPending = null, pwmTimer = null;
+function queuePwm(name, v) {
+  pwmPending = [name, v];
+  if (pwmTimer) return;
+  pwmTimer = setTimeout(() => { pwmTimer = null; const [n, val] = pwmPending; send(`PWM ${n} ${val}`); }, 40);
+}
+
+function norm(p) {
+  if (!p) return null;
+  if (/^A\d$/.test(p)) return p;
+  const n = +p.replace(/^D/, '');
+  if (Number.isNaN(n)) return null;
+  return n >= 14 && n <= 19 ? 'A' + (n - 14) : 'D' + n;
+}
+
+function setPin(name, patch) {
+  if (!name || !usable(name)) return;
+  state[name] = Object.assign(state[name] || {}, patch);
+  paintPin(name); renderWiring();
+  if (name === selected) { const s = document.getElementById('pinState'); if (s) s.textContent = describe(state[name]); }
+}
+function resetState() { for (const k in state) delete state[k]; paintAll(); renderPanel(); }
+
+async function disconnect() {
+  if (writer) await write('STOP');
+  const p = port;
+  port = null;
+  try { await reader?.cancel(); } catch {}
+  try { writer?.releaseLock(); } catch {}
+  try { await p?.close(); } catch {}
+  cleanup('Disconnected.');
+}
+
+function cleanup(msg) {
+  clearInterval(hbTimer); hbTimer = null;
+  writer = null; reader = null; port = null; buf = '';
+  setLive(false);
+  setStatus('', 'Not connected');
+  log(msg, 'sys');
+  resetState();
+}
+
+// ---- UI wiring ----
+const logEl = document.getElementById('log');
+const showHb = document.getElementById('showHb');
+const cmdEl = document.getElementById('cmd');
+const history = []; let histIdx = 0;
+
+function log(text, cls) {
+  const line = document.createElement('div');
+  const t = new Date().toLocaleTimeString([], { hour12: false });
+  line.innerHTML = `<span class="t">${t}</span> ${cls === 'tx' ? '› ' : ''}`;
+  const span = document.createElement('span');
+  if (cls) span.className = cls;
+  span.textContent = text;
+  line.appendChild(span);
+  const atBottom = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 30;
+  logEl.appendChild(line);
+  while (logEl.childElementCount > 500) logEl.firstChild.remove();
+  if (atBottom) logEl.scrollTop = logEl.scrollHeight;
+}
+
+function setStatus(kind, text) {
+  document.getElementById('dot').className = 'dot ' + kind;
+  document.getElementById('statusText').textContent = text;
+}
+
+function setLive(on) {
+  document.getElementById('connect').disabled = on;
+  document.getElementById('disconnect').disabled = !on;
+  document.getElementById('stopAll').disabled = !on;
+  document.getElementById('send').disabled = !on;
+  cmdEl.disabled = !on;
+  document.querySelectorAll('[data-quick]').forEach(b => b.disabled = !on);
+  renderPanel();
+}
+
+function submit() {
+  const v = cmdEl.value.trim();
+  if (!v) return;
+  history.push(v); histIdx = history.length;
+  send(v); cmdEl.value = '';
+}
+
+document.getElementById('connect').onclick = () => connect();
+document.getElementById('disconnect').onclick = disconnect;
+document.getElementById('stopAll').onclick = () => send('STOP');
+document.getElementById('send').onclick = submit;
+document.querySelectorAll('[data-quick]').forEach(b => b.onclick = () => send(b.dataset.quick));
+cmdEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') submit();
+  else if (e.key === 'ArrowUp' && histIdx > 0) { cmdEl.value = history[--histIdx]; e.preventDefault(); }
+  else if (e.key === 'ArrowDown') { histIdx = Math.min(history.length, histIdx + 1); cmdEl.value = history[histIdx] || ''; }
+});
+
+drawBoard();
+paintAll();
+log('Plug in the Uno, then click "Connect board". Commands you can type once connected:', 'sys');
+log('  HIGH 7 · LOW 7 · PWM 9 128 · IN 4 · PULLUP 4 · READ 4 · AREAD A0 · STOP · PING · INFO', 'sys');
+
+if (!('serial' in navigator)) {
+  document.getElementById('banner').style.display = 'block';
+  document.getElementById('connect').disabled = true;
+} else {
+  // Reconnect automatically to a board this page was allowed to use before.
+  navigator.serial.getPorts().then(ports => { if (ports[0] && !port) connect(ports[0]); });
+  navigator.serial.addEventListener('connect', e => { if (!port) { log('Board plugged in.', 'sys'); connect(e.target); } });
+  navigator.serial.addEventListener('disconnect', e => { if (e.target === port) cleanup('Board unplugged.'); });
+}
+</script>
+</body>
+</html>

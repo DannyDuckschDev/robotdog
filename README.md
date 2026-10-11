@@ -89,6 +89,13 @@ Measured angles for each servo go in [`docs/calibration.md`](docs/calibration.md
 ```
 robotdog/
 ├── README.md
+├── bench.sh                  start the browser bench
+├── flash.sh                  upload the bench firmware to the Uno
+├── bench/
+│   └── index.html            browser bench: pinout, pin controls, terminal
+├── firmware/
+│   └── bench/
+│       └── bench.ino         text-command firmware the bench talks to
 ├── docs/
 │   └── calibration.md        closed / open / neutral angle per servo
 └── tests/
@@ -118,6 +125,18 @@ If the compiler reports that `Servo.h` is missing, install the "Servo" library v
 | Sketch | What it does |
 |---|---|
 | `tests/jaw_test` | Type an angle from 0 to 180 in the Serial Monitor; the jaw servo moves there. Used to find the closed and open angles. |
+
+## Browser bench
+
+A page for driving the Uno's pins live from Chrome, with a clickable pinout and a serial terminal. Meant for testing the motor driver wiring before writing a real sketch.
+
+1. Flash the bench firmware once: `./flash.sh` (needs `arduino-cli`; `brew install arduino-cli`, then `arduino-cli core install arduino:avr`).
+2. Start the page: `./bench.sh`. It opens http://localhost:8765 in Chrome. Web Serial only works in Chrome or Edge.
+3. Click **Connect board** and pick the Uno. After the first time, the page reconnects by itself when the board is plugged in.
+
+Click a pin to switch it HIGH/LOW, set PWM, read it, or give it a label like `IN1`. Labels show on the board drawing and in a wiring table, and are remembered in that browser. **STOP ALL** sets every output back to LOW.
+
+The firmware also works from the Arduino Serial Monitor at 115200 baud: `HIGH 7`, `LOW 7`, `PWM 9 128`, `IN 4`, `PULLUP 4`, `READ 4`, `AREAD A0`, `STOP`, `PING`, `INFO`. Pins 0 and 1 are refused because USB serial uses them. Only pins 3, 5, 6, 9, 10 and 11 do PWM, which matters for motor speed (the driver's `ENA`/`ENB`).
 
 ## Fabrication
 
