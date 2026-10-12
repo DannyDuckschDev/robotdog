@@ -12,7 +12,8 @@ Early prototyping. Working on the head first, one servo at a time, on a borrowed
 
 - [x] Cardboard prototype of the head
 - [x] Coglet head assembled digitally in Fusion 360
-- [x] Jaw servo test sketch written (`tests/jaw_test`)
+- [x] Jaw servo test sketch written (`tests/jaw/jaw_test`)
+- [x] Neck nod test sketch written (`tests/neck/neck_nod`)
 - [ ] Jaw servo tested and calibrated on hardware
 - [ ] Remaining head servos tested and calibrated
 - [ ] Head printed and assembled
@@ -46,6 +47,8 @@ Coglet's head is printed tight, so extra servos mean enlarging the head.
 
 ### Current setup: Elegoo Uno R3
 
+![Elegoo Uno R3](docs/images/setup/00-elegoo-uno-r3.jpg)
+
 Coglet runs on its own CogNog board (ESP32 plus RP2040). This build currently uses an **Elegoo Uno R3** instead, to test and calibrate servos one at a time.
 
 The Uno cannot run the Coglet or Sesame firmware as is, so every sketch in this repo is written for the Uno. The final robot will most likely need an ESP32 for Sesame's gait firmware; see open questions.
@@ -57,16 +60,16 @@ The step-by-step version with photos, including the breadboard, is [`docs/setup-
 | Servo wire | Uno pin |
 |---|---|
 | Brown or black (ground) | `GND` |
-| Red (power) | `5V` |
+| Red (power) | `5V` (from the second servo on: the `+` strip, see Power) |
 | Orange or yellow (signal) | a digital pin, see the pin map |
 
 The servo plug is female. Use three male-to-male jumper wires between the plug and the Uno headers. Swapping red and brown can destroy the servo, so check the colours before plugging in USB.
 
 ### Power
 
-One micro servo runs from the Uno's `5V` pin over USB. If the Uno resets or the servo twitches, it is short on power.
+One micro servo can run from the Uno's `5V` pin. From the second servo on, the breadboard's `+` and `−` strips are fed by a separate USB cable (red `+`, blue `−`) from a USB charger, and the Uno's `5V` is no longer connected to the strips. Only one supply may feed a strip.
 
-More than two or three servos need a separate 5 V supply. Connect its ground to the Uno's `GND`, or the signal has no reference and the servos behave randomly.
+The Uno's `GND` stays connected to the `−` strip, or the servo signal has no reference and the servos behave randomly. Step by step: [`docs/setup-guide.md`](docs/setup-guide.md#6-second-servo-separate-5-v-supply-for-the-strips).
 
 ### Pin map
 
@@ -76,8 +79,8 @@ Coglet's nine head servos, with the Uno pin each one gets. The live version, wit
 |---|---|---|
 | Mouth (jaw) | 9 | Sketch written |
 | Yaw (neck) | 2 | Planned |
-| Roll (neck) | 3 | Planned |
-| Pitch (neck) | 4 | Planned |
+| Pitch (neck) | 3 | Wired (row 9) |
+| Roll (neck) | — | Not used for now |
 | Left eye | 5 | Planned |
 | Right eye | 6 | Planned |
 | Eyelid | 7 | Planned |
@@ -104,11 +107,15 @@ robotdog/
 │   ├── calibration.md        closed / open / neutral angle per servo
 │   ├── setup-guide.md        how the jaw was wired, with photos, and how to add the next servo
 │   └── images/               screenshots and setup photos
-└── tests/
-    ├── jaw_test/
-    │   └── jaw_test.ino      move the jaw servo to a typed angle
-    └── jaw_cycle/
-        └── jaw_cycle.ino     open and close the jaw a few times
+└── tests/                    one folder per body part, one sketch per test
+    ├── jaw/
+    │   ├── jaw_test/
+    │   │   └── jaw_test.ino  move the jaw servo to a typed angle
+    │   └── jaw_cycle/
+    │       └── jaw_cycle.ino open and close the jaw a few times
+    └── neck/
+        └── neck_nod/
+            └── neck_nod.ino  nod the neck slowly 10° up and down
 ```
 
 ## Working with the sketches
@@ -119,12 +126,16 @@ The Uno holds one program at a time. Uploading a sketch replaces whatever was on
 
 To run a test:
 
-1. In the Arduino IDE, choose File → Open and pick the `.ino` file, for example `tests/jaw_test/jaw_test.ino`. Each sketch opens in its own window.
+1. In the Arduino IDE, choose File → Open and pick the `.ino` file, for example `tests/jaw/jaw_test/jaw_test.ino`. Each sketch opens in its own window.
 2. Select the board (Tools → Board → Arduino Uno) and the port (Tools → Port, the entry with "usbmodem" or "usbserial" in its name).
 3. Click Upload (the arrow button).
 4. Open the Serial Monitor (Tools → Serial Monitor) and set it to 9600 baud.
 
-To add a test, create a new folder under `tests/` and put a `.ino` file with the same name inside it.
+To add a test, create a folder for it inside the body part's folder (`tests/neck/`, `tests/ear/` and so on) and put a `.ino` file with the same name inside it.
+
+Uploading a test replaces the bench firmware on the Uno. To use the browser bench again, upload it back with `./flash.sh` or by opening `firmware/bench/bench.ino`.
+
+Later, the finished robot runs one sketch that does everything. It can still be split by body part: an Arduino sketch folder may hold several `.ino` files (they show as tabs in the IDE) and they are compiled together into one program.
 
 If the compiler reports that `Servo.h` is missing, install the "Servo" library via Tools → Manage Libraries.
 
@@ -132,8 +143,9 @@ If the compiler reports that `Servo.h` is missing, install the "Servo" library v
 
 | Sketch | What it does |
 |---|---|
-| `tests/jaw_test` | Type an angle from 0 to 180 in the Serial Monitor; the jaw servo moves there. Used to find the closed and open angles. |
-| `tests/jaw_cycle` | Opens and closes the jaw between two set angles a few times, at a set speed. Press Enter in the Serial Monitor to run it again. |
+| `tests/jaw/jaw_test` | Type an angle from 0 to 180 in the Serial Monitor; the jaw servo moves there. Used to find the closed and open angles. |
+| `tests/jaw/jaw_cycle` | Opens and closes the jaw between two set angles a few times, at a set speed. Press Enter in the Serial Monitor to run it again. |
+| `tests/neck/neck_nod` | Pitch servo on pin 3: nods slowly to each side of the center (`RANGE`, now 45°), three times. Enter nods again; typing an angle sets a new center. |
 
 ## Browser bench
 

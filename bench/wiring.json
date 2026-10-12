@@ -1,8 +1,10 @@
 {
   "power": {
-    "5V": {
-      "rail": "+",
-      "color": "red"
+    "supply": {
+      "name": "Servo power (USB 5V)",
+      "source": "USB hub on the Mac",
+      "plus": "red",
+      "minus": "blue"
     },
     "GND": {
       "rail": "-",
@@ -35,18 +37,20 @@
       "planned": true
     },
     {
-      "id": "roll",
-      "name": "Roll (neck)",
-      "type": "servo",
-      "pin": 3,
-      "planned": true
-    },
-    {
       "id": "pitch",
       "name": "Pitch (neck)",
       "type": "servo",
-      "pin": 4,
-      "planned": true
+      "pin": 3,
+      "row": 9,
+      "closed": 45,
+      "open": 135,
+      "speed": 50,
+      "wires": {
+        "link": "green",
+        "signal": "yellow",
+        "power": "orange",
+        "ground": "grey"
+      }
     },
     {
       "id": "eye-l",

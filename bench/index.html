@@ -375,6 +375,17 @@ function drawWires() {
       wire(`M${g.x},${g.y} C${g.x},${g.y + 110} ${BB.minus - 30},${hy + 80} ${BB.minus},${hy}`, pw.GND.color);
     }
   }
+  // Separate servo supply (USB cable with jumper ends) feeding the strips from below.
+  if (pw.supply) {
+    const hy = rowY(rows), bx = 590, by = 432, bw = 165;
+    wire(`M${bx + bw},${by + 14} C${BB.plus - 10},${by + 14} ${BB.plus},${hy + 40} ${BB.plus},${hy}`, pw.supply.plus || 'red');
+    wire(`M${bx + bw},${by + 32} C${BB.minus + 10},${by + 32} ${BB.minus},${hy + 50} ${BB.minus},${hy}`, pw.supply.minus || 'blue');
+    const g = el('g', { class: 'servo-box' });
+    el('rect', { x: bx, y: by, width: bw, height: 44, rx: 6 }, g);
+    el('text', { x: bx + 12, y: by + 19 }, g).textContent = pw.supply.name || 'Servo power (USB 5V)';
+    el('text', { class: 'sub', x: bx + 12, y: by + 35 }, g).textContent = pw.supply.source || '';
+    el('title', {}, g).textContent = 'Feeds the + and − strips for the servos. The Uno\'s 5V is not connected to the strips; its GND is.';
+  }
   // Each wired part: Uno pin -> hole b<row>.
   for (const p of wiring.parts.filter(isWired)) {
     const name = norm(p.pin), pos = pinPos[name];
