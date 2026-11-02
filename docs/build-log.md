@@ -25,3 +25,9 @@ What was done, in order, and why. One entry per step that worked. Details and ph
 - **What:** Second servo on Uno pin 3, breadboard row 9, tested with `tests/neck/neck_nod`.
 - **Why:** The neck only has a small range, so it moves slowly, 1° at a time, around a center.
 - **How:** `STEP_DELAY` sets the speed, `RANGE` the angle each way. Range so far: 45° to 135°. Tests are sorted by body part (`tests/jaw`, `tests/neck`, …).
+
+## 5. Left eye (looking left and right)
+
+- **What:** Third servo on Uno pin 6, breadboard row 15, tested with `tests/eyes/eye_sweep`.
+- **Why:** The eye turns through a gear and a curved rack, so it starts with a small range to check that the mechanism moves freely before going further.
+- **How:** First tested on the neck's wires (pin 3, row 9), then given its own row and pin. Center 80°, range ±25° (55° to 105°). Type `r` in the Serial Monitor to release the servo if it hums without moving: a blocked servo gets hot.
