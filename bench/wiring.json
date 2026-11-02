@@ -56,14 +56,23 @@
       "id": "eye-l",
       "name": "Left eye",
       "type": "servo",
-      "pin": 5,
-      "planned": true
+      "pin": 6,
+      "row": 15,
+      "closed": 55,
+      "open": 105,
+      "speed": 30,
+      "wires": {
+        "link": "green",
+        "signal": "yellow",
+        "power": "orange",
+        "ground": "grey"
+      }
     },
     {
       "id": "eye-r",
       "name": "Right eye",
       "type": "servo",
-      "pin": 6,
+      "pin": 5,
       "planned": true
     },
     {
