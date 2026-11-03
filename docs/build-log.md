@@ -44,4 +44,5 @@ What was done, in order, and why. One entry per step that worked. Details and ph
 - **What:** Fifth servo on Uno pin 8, breadboard row 25, with `tests/lower_lip/lower_lip_sweep`: 20° up and 20° down around a center of 90°. Separate from the jaw on pin 9. The left ear's planned pin moved from 8 to 4.
 - **Status:** The sketch compiles, but the lip does not move yet.
 - **Open question:** The lower lip is fixed to the head with a screw and has more resistance than the other parts. Check whether an SG90 (about 1.8 kg·cm) is strong enough, or whether it needs a stronger servo such as the metal-gear MG90S (about 2.2 kg·cm, same size). First check: loosen the screw a little and see whether the lip moves by hand without force.
+- **Next:** A stronger servo is on hand and will be tested on the lower lip.
 - **Error along the way:** Upload failed with `cannot open port /dev/cu.usbmodem…: Resource busy`. The browser bench was still connected to the Uno over Web Serial, and only one program can use the port at a time. Fix: click Disconnect in the bench (or close its tab) before uploading a sketch.

@@ -7,7 +7,7 @@ If a servo buzzes or strains at an angle, it has hit a mechanical stop. Back off
 | Servo | Uno pin | Min angle | Max angle | Neutral | Notes |
 |---|---|---|---|---|---|
 | Mouth (jaw) | 9 | | | | min = closed, max = open |
-| Lower lip | 8 | 70 | 110 | 90 | row 25; planned ±20°, not working yet; more resistance than the others, servo may be too weak |
+| Lower lip | 8 | 70 | 110 | 90 | row 25; planned ±20°, not working yet; more resistance than the others, servo may be too weak; a stronger servo is next to test |
 | Yaw (neck) | 2 | | | | |
 | Pitch (neck) | 3 | | | | |
 | Roll (neck) | — | | | | not used for now |
