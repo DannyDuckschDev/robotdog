@@ -78,13 +78,14 @@ Coglet's nine head servos, with the Uno pin each one gets. The live version, wit
 | Servo | Uno pin | Status |
 |---|---|---|
 | Mouth (jaw) | 9 | Sketch written |
+| Lower lip | 8 | Wired (row 25), not working yet |
 | Yaw (neck) | 2 | Planned |
 | Pitch (neck) | 3 | Wired (row 9) |
 | Roll (neck) | — | Not used for now |
 | Left eye | 6 | Wired (row 15) |
 | Right eye | 5 | Wired (row 19) |
 | Eyelid | 7 | Planned |
-| Left ear | 8 | Planned |
+| Left ear | 4 | Planned |
 | Right ear | 10 | Planned |
 
 Measured angles for each servo go in [`docs/calibration.md`](docs/calibration.md).
@@ -113,6 +114,9 @@ robotdog/
     │   │   └── jaw_test.ino  move the jaw servo to a typed angle
     │   └── jaw_cycle/
     │       └── jaw_cycle.ino open and close the jaw a few times
+    ├── lower_lip/
+    │   └── lower_lip_sweep/
+    │       └── lower_lip_sweep.ino  move the lower lip 20° up and down (not working yet)
     ├── neck/
     │   └── neck_nod/
     │       └── neck_nod.ino  nod the neck slowly up and down
