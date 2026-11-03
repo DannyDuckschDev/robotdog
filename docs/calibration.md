@@ -11,7 +11,7 @@ If a servo buzzes or strains at an angle, it has hit a mechanical stop. Back off
 | Pitch (neck) | 3 | | | | |
 | Roll (neck) | — | | | | not used for now |
 | Left eye | 6 | 55 | 105 | 80 | tested with `tests/eyes/eye_sweep` |
-| Right eye | 5 | | | | test with `tests/eyes/eye_sweep_right`; note if mirrored |
+| Right eye | 5 | 35 | 115 | 80 | row 19, mirrored; 45° below the center, 35° above |
 | Eyelid | 7 | | | | |
 | Left ear | 8 | | | | |
 | Right ear | 10 | | | | |

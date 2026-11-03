@@ -82,7 +82,7 @@ Coglet's nine head servos, with the Uno pin each one gets. The live version, wit
 | Pitch (neck) | 3 | Wired (row 9) |
 | Roll (neck) | — | Not used for now |
 | Left eye | 6 | Wired (row 15) |
-| Right eye | 5 | Sketch written |
+| Right eye | 5 | Wired (row 19) |
 | Eyelid | 7 | Planned |
 | Left ear | 8 | Planned |
 | Right ear | 10 | Planned |

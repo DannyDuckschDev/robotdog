@@ -73,7 +73,16 @@
       "name": "Right eye",
       "type": "servo",
       "pin": 5,
-      "planned": true
+      "row": 19,
+      "closed": 35,
+      "open": 115,
+      "speed": 30,
+      "wires": {
+        "link": "green",
+        "signal": "yellow",
+        "power": "orange",
+        "ground": "grey"
+      }
     },
     {
       "id": "eyelid",

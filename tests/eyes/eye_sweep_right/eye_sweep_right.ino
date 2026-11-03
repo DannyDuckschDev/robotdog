@@ -1,38 +1,23 @@
-// Right eye sweep test (left/right) for Arduino / Elegoo Uno R3
-// Wiring: servo signal (orange) -> breadboard row (own row) -> Uno pin 5
-//         servo red -> + strip, servo brown -> - strip
-//         (strips fed by the separate servo power cable, Uno GND on the - strip)
+// Right eye sweep test: Uno pin 5, breadboard row 19.
+// Looks to one side, back to center, to the other side, back. Prints the
+// angle at each side. Each side has its own range (RANGE_BELOW/ABOVE).
+// MIRRORED makes it look the same way first as the left eye.
 //
-// What it does: looks slowly RANGE degrees to one side, back to the center,
-// RANGE degrees to the other side, back to the center. CYCLES times.
-// The first look goes the same way as the left eye's first look
-// (tests/eyes/eye_sweep), as long as MIRRORED is set correctly.
-//
-// Serial Monitor at 9600 baud, line ending "New Line":
-//   press Enter         -> sweep again
-//   type e.g. 95, Enter -> move slowly to angle 95 and use it as the new center
-//   type r, Enter       -> release: servo goes limp, so you can turn the gears by hand
-//
-// Finding the settings:
-// 1. center: type angles until the eye looks straight ahead. Write that
-//    number into `center` below and into docs/calibration.md.
-// 2. MIRRORED: run the left eye sketch, watch which way it looks first,
-//    then run this one. If the right eye looks the other way first, flip
-//    MIRRORED. With the servos mounted mirror-image, it is usually true.
-//
-// If the servo hums but the eye does not move, the mechanism is too stiff:
-// type r at once and fix the mechanics. A blocked servo gets hot.
+// Serial Monitor, 9600 baud, "New Line":
+//   Enter = sweep again, a number = new center, r = release the servo.
+// If the servo hums without moving, type r: a blocked servo gets hot.
 
 #include <Servo.h>
 
 const int SERVO_PIN = 5;
-const bool MIRRORED = true;  // true = a higher angle turns this eye the other way than the left eye
-const int RANGE = 25;        // degrees left and right of the center; start small
+const bool MIRRORED = true;  // true = mounted mirror-image to the left eye
+const int RANGE_BELOW = 45;  // degrees below the center: 80 - 45 = 35
+const int RANGE_ABOVE = 35;  // degrees above the center: 80 + 35 = 115
 const int STEP_DELAY = 30;   // ms per degree: bigger = slower
 const int PAUSE = 200;       // ms to hold at each side
 const int CYCLES = 3;        // sweeps per run
 
-int center = 80;             // starting guess (left eye's value); replace with the measured one
+int center = 80;
 int current;
 
 Servo eye;
@@ -46,19 +31,22 @@ void moveTo(int target) {
   }
 }
 
-// Look `offset` degrees from the center, in the left eye's direction.
-// Negative = the side the left eye looks to first.
-void look(int offset) {
-  moveTo(center + (MIRRORED ? -offset : offset));
+// side = -1: the side the left eye looks to first, +1: the other side, 0: center.
+void look(int side) {
+  if (side == 0) { moveTo(center); return; }
+  if (MIRRORED) side = -side;
+  moveTo(side < 0 ? center - RANGE_BELOW : center + RANGE_ABOVE);
+  Serial.print("At ");
+  Serial.println(current);
 }
 
 void sweep() {
   for (int i = 0; i < CYCLES; i++) {
-    look(-RANGE);
+    look(-1);
     delay(PAUSE);
     look(0);
     delay(PAUSE);
-    look(RANGE);
+    look(1);
     delay(PAUSE);
     look(0);
     delay(PAUSE);
@@ -74,8 +62,10 @@ void setup() {
   delay(1000);
   Serial.print("Right eye sweep test. Center ");
   Serial.print(center);
-  Serial.print(", range +/-");
-  Serial.print(RANGE);
+  Serial.print(", from ");
+  Serial.print(center - RANGE_BELOW);
+  Serial.print(" to ");
+  Serial.print(center + RANGE_ABOVE);
   Serial.println(MIRRORED ? ", mirrored" : ", not mirrored");
   sweep();
 }
@@ -92,7 +82,7 @@ void loop() {
     eye.detach();
     Serial.println("Released. Enter or a number moves it again.");
   } else if (isDigit(line[0])) {
-    int newCenter = constrain(line.toInt(), RANGE, 180 - RANGE);
+    int newCenter = constrain(line.toInt(), RANGE_BELOW, 180 - RANGE_ABOVE);
     moveTo(newCenter);
     center = newCenter;
     Serial.print("Center is now ");

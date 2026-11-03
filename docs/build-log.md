@@ -31,3 +31,10 @@ What was done, in order, and why. One entry per step that worked. Details and ph
 - **What:** Third servo on Uno pin 6, breadboard row 15, tested with `tests/eyes/eye_sweep`.
 - **Why:** The eye turns through a gear and a curved rack, so it starts with a small range to check that the mechanism moves freely before going further.
 - **How:** First tested on the neck's wires (pin 3, row 9), then given its own row and pin. Center 80°, range ±25° (55° to 105°). Type `r` in the Serial Monitor to release the servo if it hums without moving: a blocked servo gets hot.
+
+## 6. Right eye
+
+- **What:** Fourth servo on Uno pin 5, breadboard row 19, tested with `tests/eyes/eye_sweep_right`.
+- **Why:** The right eye is mounted mirror-image to the left one, so the same angle can turn it the other way. The sketch has a `MIRRORED` switch so both eyes look the same way first.
+- **How:** Started like the left eye (center 80°, 55° to 105°), then widened per side, because the eye turns further one way than the other. Both eye sketches now have a separate range for each side (`RANGE_BELOW`, `RANGE_ABOVE`) and print the angle at each end. Right eye: 45° below, 35° above the center (35° to 115°).
+- **Error along the way:** The upload failed with `cannot open port /dev/cu.usbmodem…: No such file or directory`. The sketch had compiled fine; the Mac simply did not see the Uno, because the USB cable was not fully plugged in. Fix: push the cable in until the Uno's ON LED lights, then pick the `usbmodem` port again under Tools → Port (the number can change after replugging).
