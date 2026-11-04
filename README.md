@@ -15,9 +15,13 @@ Early prototyping. Working on the head first, one servo at a time, on a borrowed
 - [x] Jaw servo test sketch written (`tests/jaw/jaw_test`)
 - [x] Neck nod test sketch written (`tests/neck/neck_nod`)
 - [x] Neck base (yaw) tested: 45° to 135° (`tests/neck/neck_base`)
+- [x] Left and right eye tested (`tests/eyes/eye_sweep`, `tests/eyes/eye_sweep_right`)
+- [x] Lower lip moves: closed 165°, open 80° (`tests/lower_lip/lower_lip_sweep`). Still jumps at the start and jerks while moving. A stronger servo is on hand as a backup, but not needed for now.
 - [ ] Jaw servo tested and calibrated on hardware
-- [ ] Remaining head servos tested and calibrated
+- [ ] Remaining head servos (eyelid, ears) tested and calibrated
+- [ ] Inner-neck/top-base printed in PETG ([#5](https://github.com/DannyDuckschDev/robotdog/issues/5))
 - [ ] Head printed and assembled
+- [ ] Mouth code refactored once its full functionality is decided ([#4](https://github.com/DannyDuckschDev/robotdog/issues/4), version 3.0)
 - [ ] Sesame body built and walking with its own firmware
 - [ ] Tail mechanism designed
 - [ ] Head mounted on body, electronics consolidated
@@ -159,6 +163,8 @@ If the compiler reports that `Servo.h` is missing, install the "Servo" library v
 | `tests/jaw/jaw_cycle` | Opens and closes the jaw between two set angles a few times, at a set speed. Press Enter in the Serial Monitor to run it again. |
 | `tests/lower_lip/lower_lip_sweep` | Lower lip servo on pin 8, row 25: starts closed (165°), opens slowly to 80°, closes again, three times. Enter runs it again, a number moves it to that angle, `r` releases the servo. |
 | `tests/neck/neck_nod` | Pitch servo on pin 3: nods slowly to each side of the center (`RANGE`, now 45°), three times. Enter nods again; typing an angle sets a new center. |
+| `tests/eyes/eye_sweep` | Left eye on pin 6: looks to each side of the center and back, three times. Each side has its own range. Enter runs it again, a number sets a new center, `r` releases the servo. |
+| `tests/eyes/eye_sweep_right` | Right eye on pin 5: the same, with a `MIRRORED` switch so it looks the same way first as the left eye. |
 | `tests/neck/neck_base` | Yaw servo on pin 10, row 30: turns the whole head left and right. Type an angle and it turns there slowly (1° every 20 ms), or type `+` / `-` to move 2°. Always stays between 45° and 135°. |
 
 ## Browser bench
