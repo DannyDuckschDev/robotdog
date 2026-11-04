@@ -39,13 +39,15 @@ What was done, in order, and why. One entry per step that worked. Details and ph
 - **How:** Started like the left eye (center 80°, 55° to 105°), then widened per side, because the eye turns further one way than the other. Both eye sketches now have a separate range for each side (`RANGE_BELOW`, `RANGE_ABOVE`) and print the angle at each end. Right eye: 45° below, 35° above the center (35° to 115°).
 - **Error along the way:** The upload failed with `cannot open port /dev/cu.usbmodem…: No such file or directory`. The sketch had compiled fine; the Mac simply did not see the Uno, because the USB cable was not fully plugged in. Fix: push the cable in until the Uno's ON LED lights, then pick the `usbmodem` port again under Tools → Port (the number can change after replugging).
 
-## 7. Lower lip (not working yet)
+## 7. Lower lip
 
-- **What:** Fifth servo on Uno pin 8, breadboard row 25, with `tests/lower_lip/lower_lip_sweep`: 20° up and 20° down around a center of 90°. Separate from the jaw on pin 9. The left ear's planned pin moved from 8 to 4.
-- **Status:** The sketch compiles, but the lip does not move yet.
-- **Open question:** The lower lip is fixed to the head with a screw and has more resistance than the other parts. Check whether an SG90 (about 1.8 kg·cm) is strong enough, or whether it needs a stronger servo such as the metal-gear MG90S (about 2.2 kg·cm, same size). First check: loosen the screw a little and see whether the lip moves by hand without force.
-- **Next:** A stronger servo is on hand and will be tested on the lower lip.
+- **What:** Fifth servo on Uno pin 8, breadboard row 25, tested with `tests/lower_lip/lower_lip_sweep`. Separate from the jaw on pin 9. The left ear's planned pin moved from 8 to 4.
+- **Why:** The lip should rest closed and only open from there, so the sketch starts at the closed angle, opens slowly and closes again. It never moves past closed.
+- **How:** Closed 165°, open 80°. The closed angle is the bigger one because of how the servo is mounted. Type an angle in the Serial Monitor to fine-tune both values.
+- **First attempt:** A sweep of ±20° around 90°. The servo only hummed and the lip did not move. With the power off, neither could be turned by hand, so something was jammed. The original Coglet uses the same kind of servo, so the SG90 should be strong enough once the lip moves freely. A sweep around a center also closed the lip further first before opening it, which is why the sketch now goes closed → open → closed.
+- **Still open:** The lip jumps at the start, because a servo cannot report its position and goes to the closed angle at full speed. It also jerks while moving, likely friction at the pivot screw, or gear slack at the turnaround. Before unplugging, leave the lip closed so the next start has nothing to jump. The mouth code is to be refactored later ([issue #4](https://github.com/DannyDuckschDev/robotdog/issues/4)).
 - **Error along the way:** Upload failed with `cannot open port /dev/cu.usbmodem…: Resource busy`. The browser bench was still connected to the Uno over Web Serial, and only one program can use the port at a time. Fix: click Disconnect in the bench (or close its tab) before uploading a sketch.
+- **Error along the way:** Upload failed with `Device not configured` and `programmer is not responding`, ten attempts. The Mac had lost the Uno partway through because the USB cable was not fully plugged in. Fix: push the cable in until the ON LED lights and pick the `usbmodem` port again.
 
 ## 8. Neck base (turning left and right)
 

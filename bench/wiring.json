@@ -35,8 +35,8 @@
       "type": "servo",
       "pin": 8,
       "row": 25,
-      "closed": 70,
-      "open": 110,
+      "closed": 165,
+      "open": 80,
       "speed": 30,
       "wires": {
         "link": "green",
