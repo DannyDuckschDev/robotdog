@@ -1,23 +1,16 @@
-// Eye sweep test (left/right) for Arduino / Elegoo Uno R3
-// Wiring: servo signal (orange) -> breadboard row 15 -> Uno pin 6
-//         servo red -> + strip, servo brown -> - strip
-//         (strips fed by the separate servo power cable, Uno GND on the - strip)
+// Left eye sweep test: Uno pin 6, breadboard row 15.
+// Looks to one side, back to center, to the other side, back. Prints the
+// angle at each side. Each side has its own range (RANGE_BELOW/ABOVE).
 //
-// What it does: looks slowly RANGE degrees to one side, back to the center,
-// RANGE degrees to the other side, back to the center. CYCLES times.
-//
-// Serial Monitor at 9600 baud, line ending "New Line":
-//   press Enter         -> sweep again
-//   type e.g. 95, Enter -> move slowly to 95 and use it as the new center
-//   type r, Enter       -> release: servo goes limp, so you can turn the gears by hand
-//
-// If the servo hums but the eyes do not move, the mechanism is too stiff:
-// type r at once and fix the mechanics. A blocked servo gets hot.
+// Serial Monitor, 9600 baud, "New Line":
+//   Enter = sweep again, a number = new center, r = release the servo.
+// If the servo hums without moving, type r: a blocked servo gets hot.
 
 #include <Servo.h>
 
 const int SERVO_PIN = 6;
-const int RANGE = 25;        // degrees left and right of the center; start small
+const int RANGE_BELOW = 25;  // degrees below the center: 80 - 25 = 55
+const int RANGE_ABOVE = 25;  // degrees above the center: 80 + 25 = 105
 const int STEP_DELAY = 30;   // ms per degree: bigger = slower
 const int PAUSE = 200;       // ms to hold at each side
 const int CYCLES = 3;        // sweeps per run
@@ -36,15 +29,23 @@ void moveTo(int target) {
   }
 }
 
+// side = -1: below the center, +1: above the center, 0: center.
+void look(int side) {
+  if (side == 0) { moveTo(center); return; }
+  moveTo(side < 0 ? center - RANGE_BELOW : center + RANGE_ABOVE);
+  Serial.print("At ");
+  Serial.println(current);
+}
+
 void sweep() {
   for (int i = 0; i < CYCLES; i++) {
-    moveTo(center - RANGE);
+    look(-1);
     delay(PAUSE);
-    moveTo(center);
+    look(0);
     delay(PAUSE);
-    moveTo(center + RANGE);
+    look(1);
     delay(PAUSE);
-    moveTo(center);
+    look(0);
     delay(PAUSE);
   }
   Serial.println("Done. Enter = sweep again, number = new center, r = release.");
@@ -56,10 +57,12 @@ void setup() {
   eye.write(center);         // set position before attaching to avoid a jump
   eye.attach(SERVO_PIN);
   delay(1000);
-  Serial.print("Eye sweep test. Center ");
+  Serial.print("Left eye sweep test. Center ");
   Serial.print(center);
-  Serial.print(", range +/-");
-  Serial.println(RANGE);
+  Serial.print(", from ");
+  Serial.print(center - RANGE_BELOW);
+  Serial.print(" to ");
+  Serial.println(center + RANGE_ABOVE);
   sweep();
 }
 
@@ -75,7 +78,7 @@ void loop() {
     eye.detach();
     Serial.println("Released. Enter or a number moves it again.");
   } else if (isDigit(line[0])) {
-    int newCenter = constrain(line.toInt(), RANGE, 180 - RANGE);
+    int newCenter = constrain(line.toInt(), RANGE_BELOW, 180 - RANGE_ABOVE);
     moveTo(newCenter);
     center = newCenter;
     Serial.print("Center is now ");

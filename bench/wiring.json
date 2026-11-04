@@ -30,11 +30,30 @@
       }
     },
     {
+      "id": "lower-lip",
+      "name": "Lower lip",
+      "type": "servo",
+      "pin": 8,
+      "row": 25,
+      "closed": 165,
+      "open": 80,
+      "speed": 30,
+      "wires": {
+        "link": "green",
+        "signal": "yellow",
+        "power": "orange",
+        "ground": "grey"
+      }
+    },
+    {
       "id": "yaw",
       "name": "Yaw (neck)",
       "type": "servo",
-      "pin": 2,
-      "planned": true
+      "pin": 10,
+      "row": 30,
+      "closed": 45,
+      "open": 135,
+      "speed": 20
     },
     {
       "id": "pitch",
@@ -73,7 +92,16 @@
       "name": "Right eye",
       "type": "servo",
       "pin": 5,
-      "planned": true
+      "row": 19,
+      "closed": 35,
+      "open": 115,
+      "speed": 30,
+      "wires": {
+        "link": "green",
+        "signal": "yellow",
+        "power": "orange",
+        "ground": "grey"
+      }
     },
     {
       "id": "eyelid",
@@ -86,14 +114,14 @@
       "id": "ear-l",
       "name": "Left ear",
       "type": "servo",
-      "pin": 8,
+      "pin": 4,
       "planned": true
     },
     {
       "id": "ear-r",
       "name": "Right ear",
       "type": "servo",
-      "pin": 10,
+      "pin": 2,
       "planned": true
     }
   ]

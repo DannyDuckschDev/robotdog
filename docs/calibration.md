@@ -7,11 +7,12 @@ If a servo buzzes or strains at an angle, it has hit a mechanical stop. Back off
 | Servo | Uno pin | Min angle | Max angle | Neutral | Notes |
 |---|---|---|---|---|---|
 | Mouth (jaw) | 9 | | | | min = closed, max = open |
-| Yaw (neck) | 2 | | | | |
-| Roll (neck) | 3 | | | | |
-| Pitch (neck) | 4 | | | | |
-| Left eye | 5 | | | | |
-| Right eye | 6 | | | | |
+| Lower lip | 8 | 80 | 165 | 165 | row 25; min = open, max = closed; neutral is closed; tested with `tests/lower_lip/lower_lip_sweep` |
+| Yaw (neck) | 10 | 45 | 135 | 90 | row 30; tested with `tests/neck/neck_base`; range works well |
+| Pitch (neck) | 3 | | | | |
+| Roll (neck) | — | | | | not used for now |
+| Left eye | 6 | 55 | 105 | 80 | tested with `tests/eyes/eye_sweep` |
+| Right eye | 5 | 35 | 115 | 80 | row 19, mirrored; 45° below the center, 35° above |
 | Eyelid | 7 | | | | |
-| Left ear | 8 | | | | |
-| Right ear | 10 | | | | |
+| Left ear | 4 | | | | |
+| Right ear | 2 | | | | |
