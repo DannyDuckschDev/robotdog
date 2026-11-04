@@ -1,25 +1,24 @@
-// Lower lip sweep test: Uno pin 8, breadboard row 25.
-// NOT WORKING YET: the lip does not move. It is fixed to the head with a
-// screw and has more resistance than the other parts; the servo may be too weak.
-// Moves RANGE_ABOVE degrees up, back to center, RANGE_BELOW degrees down,
-// back to center. Prints the angle at each end. Which way is "up" depends
-// on how the servo is mounted.
+// Lower lip test: Uno pin 8, breadboard row 25.
+// Starts closed, opens slowly to OPEN, closes again back to CLOSED.
+// Does that CYCLES times after upload. Prints the angle at each end.
+// CLOSED is bigger than OPEN here because of how the servo is mounted.
 //
 // Serial Monitor, 9600 baud, "New Line":
-//   Enter = move again, a number = new center, r = release the servo.
+//   Enter     = open and close again
+//   a number  = move slowly to that angle (to find the exact closed/open angles)
+//   r         = release the servo
 // If the servo hums without moving, type r: a blocked servo gets hot.
 
 #include <Servo.h>
 
 const int SERVO_PIN = 8;
-const int RANGE_ABOVE = 20;  // degrees above the center: 90 + 20 = 110
-const int RANGE_BELOW = 20;  // degrees below the center: 90 - 20 = 70
+const int CLOSED = 165;      // neutral, mouth closed
+const int OPEN = 80;         // fully open
 const int STEP_DELAY = 30;   // ms per degree: bigger = slower
 const int PAUSE = 300;       // ms to hold at each end
-const int CYCLES = 3;        // up/down movements per run
+const int CYCLES = 3;        // open/close movements per run
 
-int center = 90;
-int current;
+int current = CLOSED;
 
 Servo lip;
 
@@ -30,40 +29,31 @@ void moveTo(int target) {
     lip.write(current);
     delay(STEP_DELAY);
   }
-}
-
-void moveAndReport(int target) {
-  moveTo(target);
   Serial.print("At ");
   Serial.println(current);
 }
 
 void cycle() {
+  moveTo(CLOSED);            // always start from closed
+  delay(PAUSE);
   for (int i = 0; i < CYCLES; i++) {
-    moveAndReport(center + RANGE_ABOVE);
+    moveTo(OPEN);
     delay(PAUSE);
-    moveTo(center);
-    delay(PAUSE);
-    moveAndReport(center - RANGE_BELOW);
-    delay(PAUSE);
-    moveTo(center);
+    moveTo(CLOSED);
     delay(PAUSE);
   }
-  Serial.println("Done. Enter = move again, number = new center, r = release.");
+  Serial.println("Done. Enter = again, number = move there, r = release.");
 }
 
 void setup() {
   Serial.begin(9600);
-  current = center;
-  lip.write(center);       // set position before attaching to avoid a jump
+  lip.write(CLOSED);         // set position before attaching to avoid a jump
   lip.attach(SERVO_PIN);
   delay(1000);
-  Serial.print("Lower lip sweep test. Center ");
-  Serial.print(center);
-  Serial.print(", from ");
-  Serial.print(center - RANGE_BELOW);
-  Serial.print(" to ");
-  Serial.println(center + RANGE_ABOVE);
+  Serial.print("Lower lip test. Closed ");
+  Serial.print(CLOSED);
+  Serial.print(", open ");
+  Serial.println(OPEN);
   cycle();
 }
 
@@ -79,10 +69,6 @@ void loop() {
     lip.detach();
     Serial.println("Released. Enter or a number moves it again.");
   } else if (isDigit(line[0])) {
-    int newCenter = constrain(line.toInt(), RANGE_BELOW, 180 - RANGE_ABOVE);
-    moveTo(newCenter);
-    center = newCenter;
-    Serial.print("Center is now ");
-    Serial.println(center);
+    moveTo(constrain(line.toInt(), 0, 180));
   }
 }
