@@ -14,6 +14,7 @@ Early prototyping. Working on the head first, one servo at a time, on a borrowed
 - [x] Coglet head assembled digitally in Fusion 360
 - [x] Jaw servo test sketch written (`tests/jaw/jaw_test`)
 - [x] Neck nod test sketch written (`tests/neck/neck_nod`)
+- [x] Neck base (yaw) tested: 45° to 135° (`tests/neck/neck_base`)
 - [ ] Jaw servo tested and calibrated on hardware
 - [ ] Remaining head servos tested and calibrated
 - [ ] Head printed and assembled
@@ -79,14 +80,14 @@ Coglet's nine head servos, with the Uno pin each one gets. The live version, wit
 |---|---|---|
 | Mouth (jaw) | 9 | Sketch written |
 | Lower lip | 8 | Wired (row 25), not working yet |
-| Yaw (neck) | 2 | Planned |
+| Yaw (neck) | 10 | Wired (row 30), tested 45° to 135° |
 | Pitch (neck) | 3 | Wired (row 9) |
 | Roll (neck) | — | Not used for now |
 | Left eye | 6 | Wired (row 15) |
 | Right eye | 5 | Wired (row 19) |
 | Eyelid | 7 | Planned |
 | Left ear | 4 | Planned |
-| Right ear | 10 | Planned |
+| Right ear | 2 | Planned |
 
 Measured angles for each servo go in [`docs/calibration.md`](docs/calibration.md).
 
@@ -118,8 +119,10 @@ robotdog/
     │   └── lower_lip_sweep/
     │       └── lower_lip_sweep.ino  move the lower lip 20° up and down (not working yet)
     ├── neck/
-    │   └── neck_nod/
-    │       └── neck_nod.ino  nod the neck slowly up and down
+    │   ├── neck_nod/
+    │   │   └── neck_nod.ino  nod the neck slowly up and down
+    │   └── neck_base/
+    │       └── neck_base.ino turn the whole head left and right (typed angle, or + / -)
     └── eyes/
         ├── eye_sweep/
         │   └── eye_sweep.ino left eye: look left and right around a center
@@ -155,6 +158,7 @@ If the compiler reports that `Servo.h` is missing, install the "Servo" library v
 | `tests/jaw/jaw_test` | Type an angle from 0 to 180 in the Serial Monitor; the jaw servo moves there. Used to find the closed and open angles. |
 | `tests/jaw/jaw_cycle` | Opens and closes the jaw between two set angles a few times, at a set speed. Press Enter in the Serial Monitor to run it again. |
 | `tests/neck/neck_nod` | Pitch servo on pin 3: nods slowly to each side of the center (`RANGE`, now 45°), three times. Enter nods again; typing an angle sets a new center. |
+| `tests/neck/neck_base` | Yaw servo on pin 10, row 30: turns the whole head left and right. Type an angle and it turns there slowly (1° every 20 ms), or type `+` / `-` to move 2°. Always stays between 45° and 135°. |
 
 ## Browser bench
 

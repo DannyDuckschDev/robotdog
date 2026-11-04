@@ -46,3 +46,9 @@ What was done, in order, and why. One entry per step that worked. Details and ph
 - **Open question:** The lower lip is fixed to the head with a screw and has more resistance than the other parts. Check whether an SG90 (about 1.8 kg·cm) is strong enough, or whether it needs a stronger servo such as the metal-gear MG90S (about 2.2 kg·cm, same size). First check: loosen the screw a little and see whether the lip moves by hand without force.
 - **Next:** A stronger servo is on hand and will be tested on the lower lip.
 - **Error along the way:** Upload failed with `cannot open port /dev/cu.usbmodem…: Resource busy`. The browser bench was still connected to the Uno over Web Serial, and only one program can use the port at a time. Fix: click Disconnect in the bench (or close its tab) before uploading a sketch.
+
+## 8. Neck base (turning left and right)
+
+- **What:** Yaw servo in the Coglet base on Uno pin 10, breadboard row 30, tested with `tests/neck/neck_base`. The right ear's planned pin moved from 10 to 2.
+- **Why:** The base turns the whole head, so the sketch moves it 1° every 20 ms and never leaves a safe range.
+- **How:** Type an angle in the Serial Monitor, or `+` / `-` for 2° steps. Range 45° to 135° around a center of 90°, and that range works well.

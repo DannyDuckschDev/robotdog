@@ -49,8 +49,11 @@
       "id": "yaw",
       "name": "Yaw (neck)",
       "type": "servo",
-      "pin": 2,
-      "planned": true
+      "pin": 10,
+      "row": 30,
+      "closed": 45,
+      "open": 135,
+      "speed": 20
     },
     {
       "id": "pitch",
@@ -118,7 +121,7 @@
       "id": "ear-r",
       "name": "Right ear",
       "type": "servo",
-      "pin": 10,
+      "pin": 2,
       "planned": true
     }
   ]

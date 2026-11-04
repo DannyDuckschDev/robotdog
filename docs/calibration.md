@@ -8,11 +8,11 @@ If a servo buzzes or strains at an angle, it has hit a mechanical stop. Back off
 |---|---|---|---|---|---|
 | Mouth (jaw) | 9 | | | | min = closed, max = open |
 | Lower lip | 8 | 70 | 110 | 90 | row 25; planned ±20°, not working yet; more resistance than the others, servo may be too weak; a stronger servo is next to test |
-| Yaw (neck) | 2 | | | | |
+| Yaw (neck) | 10 | 45 | 135 | 90 | row 30; tested with `tests/neck/neck_base`; range works well |
 | Pitch (neck) | 3 | | | | |
 | Roll (neck) | — | | | | not used for now |
 | Left eye | 6 | 55 | 105 | 80 | tested with `tests/eyes/eye_sweep` |
 | Right eye | 5 | 35 | 115 | 80 | row 19, mirrored; 45° below the center, 35° above |
 | Eyelid | 7 | | | | |
 | Left ear | 4 | | | | |
-| Right ear | 10 | | | | |
+| Right ear | 2 | | | | |
