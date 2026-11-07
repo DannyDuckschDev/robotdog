@@ -54,3 +54,11 @@ What was done, in order, and why. One entry per step that worked. Details and ph
 - **What:** Yaw servo in the Coglet base on Uno pin 10, breadboard row 30, tested with `tests/neck/neck_base`. The right ear's planned pin moved from 10 to 2.
 - **Why:** The base turns the whole head, so the sketch moves it 1° every 20 ms and never leaves a safe range.
 - **How:** Type an angle in the Serial Monitor, or `+` / `-` for 2° steps. Range 45° to 135° around a center of 90°, and that range works well.
+
+## 9. First sensor: ultrasonic distance (HC-SR04)
+
+- **What:** HC-SR04 on Trig `A0`, Echo `A1`, VCC to Uno `5V`, GND to the `−` strip. Tested with `tests/sensors/ultrasonic_distance`. Details and photos: [`interaction-sensors.md`](interaction-sensors.md).
+- **Why:** the dog had only outputs so far. How someone approaches is the core of the artwork, and this is the cheapest sensor that measures it.
+- **How:** analog pins work as digital pins, which was needed because the digital header is full. Readings are stable to ±1–2 cm with occasional large outliers (about 241 cm), so the next step is a median filter before computing approach speed.
+- **Error along the way:** "nothing happens" after upload: the readings are in the Serial Monitor, not the Output panel.
+- **Range test:** stable to about 90 cm, usable to about 160 cm in this room. Fast approaches (~1.1 m/s) and slow ones (~0.15 m/s) differ by a factor of ~8, so speed is a reliable input. Full table in [`interaction-sensors.md`](interaction-sensors.md#3-range-and-speed-test-in-the-room).

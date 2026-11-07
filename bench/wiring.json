@@ -123,6 +123,22 @@
       "type": "servo",
       "pin": 2,
       "planned": true
+    },
+    {
+      "id": "us-trig",
+      "name": "Ultrasonic Trig",
+      "type": "sensor",
+      "pin": "A0",
+      "planned": false,
+      "note": "HC-SR04 Trig (output from Uno). White wire."
+    },
+    {
+      "id": "us-echo",
+      "name": "Ultrasonic Echo",
+      "type": "sensor",
+      "pin": "A1",
+      "planned": false,
+      "note": "HC-SR04 Echo (input to Uno). Purple wire. VCC (red) to Uno 5V, GND (black) to the - strip."
     }
   ]
 }

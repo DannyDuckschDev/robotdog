@@ -10,6 +10,8 @@ The dog is meant to look cute. That is a deliberate choice against the hard, agg
 
 Early prototyping. Working on the head first, one servo at a time, on a borrowed Arduino kit.
 
+Hand-in checklist and two-week plan: [`docs/handin-plan.md`](docs/handin-plan.md).
+
 - [x] Cardboard prototype of the head
 - [x] Coglet head assembled digitally in Fusion 360
 - [x] Jaw servo test sketch written (`tests/jaw/jaw_test`)
@@ -17,6 +19,9 @@ Early prototyping. Working on the head first, one servo at a time, on a borrowed
 - [x] Neck base (yaw) tested: 45° to 135° (`tests/neck/neck_base`)
 - [x] Left and right eye tested (`tests/eyes/eye_sweep`, `tests/eyes/eye_sweep_right`)
 - [x] Lower lip moves: closed 165°, open 80° (`tests/lower_lip/lower_lip_sweep`). Still jumps at the start and jerks while moving. A stronger servo is on hand as a backup, but not needed for now.
+- [x] Ultrasonic sensor wired, distance readings work (`tests/sensors/ultrasonic_distance`)
+- [ ] Ultrasonic: filtered readings and approach speed ([`docs/interaction-sensors.md`](docs/interaction-sensors.md))
+- [ ] Behaviour state machine: relaxed / alert / afraid / frozen
 - [ ] Jaw servo tested and calibrated on hardware
 - [ ] Remaining head servos (eyelid, ears) tested and calibrated
 - [ ] Inner-neck/top-base printed in PETG ([#5](https://github.com/DannyDuckschDev/robotdog/issues/5))
@@ -93,6 +98,13 @@ Coglet's nine head servos, with the Uno pin each one gets. The live version, wit
 | Left ear | 4 | Planned |
 | Right ear | 2 | Planned |
 
+Sensors use the analog header (details: [`docs/interaction-sensors.md`](docs/interaction-sensors.md)):
+
+| Sensor | Uno pin | Status |
+|---|---|---|
+| Ultrasonic HC-SR04 Trig | A0 | Wired |
+| Ultrasonic HC-SR04 Echo | A1 | Wired |
+
 Measured angles for each servo go in [`docs/calibration.md`](docs/calibration.md).
 
 ## Repo layout
@@ -106,11 +118,18 @@ robotdog/
 │   ├── index.html            browser bench: wiring drawing, servo and pin controls, terminal
 │   ├── server.py             serves the bench and saves wiring.json
 │   └── wiring.json           which part is on which pin, row and wire colour
+├── tools/
+│   ├── serial_log.py         log the Uno's serial output to CSV, with phase labels
+│   └── plot_log.py           plot a log and summarise each phase
+├── data/
+│   └── sensor-logs/          sensor test logs (CSV, plot, summary)
 ├── firmware/
 │   └── bench/
 │       └── bench.ino         text-command firmware the bench talks to
 ├── docs/
 │   ├── calibration.md        closed / open / neutral angle per servo
+│   ├── handin-plan.md        checklist and two-week plan for both module hand-ins
+│   ├── interaction-sensors.md  sensor plan, pins, terminology and build steps
 │   ├── setup-guide.md        how the jaw was wired, with photos, and how to add the next servo
 │   └── images/               screenshots and setup photos
 └── tests/                    one folder per body part, one sketch per test
@@ -127,6 +146,9 @@ robotdog/
     │   │   └── neck_nod.ino  nod the neck slowly up and down
     │   └── neck_base/
     │       └── neck_base.ino turn the whole head left and right (typed angle, or + / -)
+    ├── sensors/
+    │   └── ultrasonic_distance/
+    │       └── ultrasonic_distance.ino  print the distance in cm
     └── eyes/
         ├── eye_sweep/
         │   └── eye_sweep.ino left eye: look left and right around a center
@@ -166,6 +188,7 @@ If the compiler reports that `Servo.h` is missing, install the "Servo" library v
 | `tests/eyes/eye_sweep` | Left eye on pin 6: looks to each side of the center and back, three times. Each side has its own range. Enter runs it again, a number sets a new center, `r` releases the servo. |
 | `tests/eyes/eye_sweep_right` | Right eye on pin 5: the same, with a `MIRRORED` switch so it looks the same way first as the left eye. |
 | `tests/neck/neck_base` | Yaw servo on pin 10, row 30: turns the whole head left and right. Type an angle and it turns there slowly (1° every 20 ms), or type `+` / `-` to move 2°. Always stays between 45° and 135°. |
+| `tests/sensors/ultrasonic_distance` | HC-SR04 on Trig A0, Echo A1: prints the distance in cm about 10 times per second. `-1` means no echo (nothing in range). Works in the Serial Monitor and the Serial Plotter, 9600 baud. |
 
 ## Browser bench
 
