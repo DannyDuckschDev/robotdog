@@ -70,11 +70,11 @@ def main():
     def read_keyboard():
         for line in sys.stdin:
             text = line.strip()
-            if text.lower() == "q":
+            if text.lower().replace(" ", "") in ("q", "qq", "quit"):
                 stop.set()
                 return
             phase["label"] = text or "-"
-            print(f"--- phase: {phase['label']} ---")
+            print(f"\n========== PHASE: {phase['label']} ==========\n")
 
     threading.Thread(target=read_keyboard, daemon=True).start()
 

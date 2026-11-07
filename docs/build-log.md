@@ -62,3 +62,5 @@ What was done, in order, and why. One entry per step that worked. Details and ph
 - **How:** analog pins work as digital pins, which was needed because the digital header is full. Readings are stable to ±1–2 cm with occasional large outliers (about 241 cm), so the next step is a median filter before computing approach speed.
 - **Error along the way:** "nothing happens" after upload: the readings are in the Serial Monitor, not the Output panel.
 - **Range test:** stable to about 90 cm, usable to about 160 cm in this room. Fast approaches (~1.1 m/s) and slow ones (~0.15 m/s) differ by a factor of ~8, so speed is a reliable input. Full table in [`interaction-sensors.md`](interaction-sensors.md#3-range-and-speed-test-in-the-room).
+- **Range test 2 with the serial logger:** 2,153 readings, 12 approaches. Fast (1.04–1.56 m/s) and slow (0.22–0.44 m/s) never overlap. Thresholds set to slow < 0.5, fast > 0.8 m/s. A person at the 200 mark is invisible against the room, so usable range is ~130–150 cm. Details: [`interaction-sensors.md`](interaction-sensors.md#4-range-test-2-with-the-serial-logger).
+

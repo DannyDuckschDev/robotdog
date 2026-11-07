@@ -143,6 +143,38 @@ The approach readings are in [`data/sensor-logs/2026-11-07_range-test_approaches
 - Speed from median-filtered readings over ~0.5 s; first thresholds: slow < 0.3 m/s, fast > 0.6 m/s.
 - Record the empty room once (baseline) to know which distances are furniture.
 
+### 4. Range test 2 with the serial logger
+
+- **What:** same setup and floor marks as test 3, logged with `tools/serial_log.py` instead of screenshots: 2,153 readings over 240 s. Two rounds of: empty room, 40 / 120 / 200 marks, 3× fast and 3× slow from 200 to 40.
+- **Log:** raw file [`2026-11-07_1727_range-test-2.csv`](../data/sensor-logs/2026-11-07_1727_range-test-2.csv). The phase labels did not register during the test, so the phases were reconstructed from the readings afterwards in [`..._labelled.csv`](../data/sensor-logs/2026-11-07_1727_range-test-2_labelled.csv); the table is in [`..._labelled.md`](../data/sensor-logs/2026-11-07_1727_range-test-2_labelled.md).
+
+![Range test 2, all phases](../data/sensor-logs/2026-11-07_1727_range-test-2_labelled.png)
+
+| Phase | Round 1 median (p10–p90) | Round 2 median (p10–p90) |
+|---|---|---|
+| Empty room | 212.7 cm (212.3–213.1) | 213.6 cm (193.8–214.0) |
+| 40 mark | 19.8 cm (19.1–22.1) | 33.6 cm (31.7–37.7) |
+| 120 mark | 114.1 cm (100.3–128.3) | 129.9 cm (104.7–132.9) |
+| 200 mark | 213.1 cm (192.9–213.6), same as empty | 212.0 cm (192.0–213.5), same as empty |
+
+![All approach speeds so far](images/sensors/29-approach-speeds.png)
+
+| | Round 1 | Round 2 |
+|---|---|---|
+| Fast (140 → 40 cm) | 1.04 / 1.16 / 1.34 m/s | 1.17 / 1.56 / 1.55 m/s |
+| Slow (140 → 40 cm) | 0.22 / 0.24 / 0.33 m/s | 0.39 / 0.44 / 0.25 m/s |
+
+**Findings:**
+
+- **Fast and slow never overlap** across all 15 approaches (both tests): slow at most 0.44 m/s, fast at least 1.04 m/s. Speed is a reliable input.
+- **Slow got faster in round 2** (up to 0.44 m/s). A tester who repeats a walk gets impatient; real visitors will vary even more. The thresholds therefore leave room: **slow < 0.5 m/s, neutral 0.5–0.8, fast > 0.8 m/s** (changed from 0.3 / 0.6).
+- **Background:** the empty room returns 213 cm (wall) and sometimes 193 cm (cabinet). This baseline explains the ~191 cm readings in test 3.
+- **At the 200 mark the person is invisible:** the readings equal the empty room. Usable range in this room is about **130–150 cm**, less than the 160 cm estimated in test 3.
+- **Standing positions are not repeatable to the centimetre:** the same 40 mark gave 20 cm in round 1 and 34 cm in round 2, and the 120 mark jumps between ~101, ~115 and ~130 cm. Zones need margins and hysteresis.
+- **New outlier type:** ~279 cm right next to the sensor (7 times), probably an echo bounced twice. Plus 48 no-echo readings (2 %), mostly below ~20 cm or while turning. The median filter handles both.
+
+**Consequences:** "far" starts at 140 cm instead of 160 cm; speed thresholds 0.5 / 0.8 m/s; a reading equal to the empty-room baseline (±5 cm) counts as "nobody there".
+
 ## Repeating the test (protocol)
 
 Use the logger instead of screenshots. It saves every reading with a timestamp and a phase label you type while testing.
@@ -161,6 +193,9 @@ Use the logger instead of screenshots. It saves every reading with a timestamp a
 | # | Label | What to do |
 |---|---|---|
 | 1 | `empty` | Nobody in front of the sensor, 10 s (baseline: what does the room itself return?) |
+
+Check that the logger prints `========== PHASE: <label> ==========` after each label; if not, the label did not register. If typing while walking is impractical, leave the labels out and note the order instead: the phases can be reconstructed from the readings.
+
 | 2 | `40` | Stand at the 40 mark, 6 s |
 | 3 | `100` | Stand at the 100 mark, 6 s |
 | 4 | `160` | Stand at the 160 mark, 6 s |
@@ -178,5 +213,6 @@ Three runs per speed show how repeatable the speed is. Phases 1 and 8 cover what
 
 - **"Nothing happens" after upload.** The black Output panel only shows compiler messages (memory use). Readings appear in the Serial Monitor: magnifying-glass icon at the top right, 9600 baud.
 - **Only ~13 cm readings, never the person:** the sensor lay flat on the table and something close was in its cone. Fix: raise it and point it horizontally over the table edge with nothing in front.
+- **Phase labels missing in the log** (test 4): nothing typed during the test registered except `q q` at 150 s, which became a label instead of stopping. Fix: the logger now prints a large `PHASE:` line as confirmation and also stops on `q q` / `quit`.
 - **Only part of the log copied:** the Serial Monitor shows only what fits on screen. Clear it before a test and copy everything with the copy icon (two squares, top right).
 - **"Not connected. Select a board and a port"** in the Serial Monitor: the IDE lost the USB port. Check the cable and pick the `usbmodem` port again under Tools → Port.

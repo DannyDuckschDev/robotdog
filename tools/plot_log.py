@@ -74,17 +74,21 @@ def main():
     valid = [(t, v) for t, v in zip(t_all, v_all) if v >= 0]
     filt_all = median5([v for _, v in valid])
 
-    fig, ax = plt.subplots(figsize=(12, 5))
+    span = rows[-1][0] - rows[0][0]
+    fig, ax = plt.subplots(figsize=(min(24, max(12, span / 12)), 5))
     colours = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     table = ["| Phase | Readings | Median (cm) | Spread p10–p90 (cm) | Outliers | No echo | Approach 140→40 cm |",
              "|---|---|---|---|---|---|---|"]
 
+    n_label = 0
     for i, (label, pr) in enumerate(phases(rows)):
         t0, t1 = pr[0][0], pr[-1][0]
         if label != "-":
             ax.axvspan(t0, t1, color=colours[i % len(colours)], alpha=0.12, lw=0)
-            ax.text((t0 + t1) / 2, 1.01, label, transform=ax.get_xaxis_transform(),
+            # alternate two heights so labels of short phases do not overlap
+            ax.text((t0 + t1) / 2, 1.01 + 0.05 * (n_label % 2), label, transform=ax.get_xaxis_transform(),
                     ha="center", va="bottom", fontsize=9)
+            n_label += 1
         good = [(t, v) for t, _, v in pr if v >= 0]
         no_echo = len(pr) - len(good)
         if label == "-" or len(good) < 3:
@@ -108,7 +112,7 @@ def main():
     ax.set_ylim(bottom=-5)
     ax.grid(alpha=0.3)
     ax.legend(loc="upper right", fontsize=9)
-    ax.set_title(os.path.basename(base), pad=18)
+    ax.set_title(os.path.basename(base), pad=30)
     fig.tight_layout()
     fig.savefig(base + ".png", dpi=150)
 
